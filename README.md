@@ -2,6 +2,8 @@
 
 > **100% Censorship-Resistant Frontend** - Deployed to IPFS via PinMe
 
+🌐 **Live Demo**: [https://fb54bu4q.pinit.eth.limo/](https://fb54bu4q.pinit.eth.limo/)
+
 VeritasDAO is the official frontend for a decentralized journalism guild, built to be 100% censorship-resistant by using PinMe to deploy a decentralized frontend (DeFront) to IPFS and ENS.
 
 ## 🎯 Mission
@@ -59,73 +61,53 @@ A platform dedicated to "Veritas" (Truth) is useless if its own frontend is a si
 - **Censorship-Resistant**: No single entity can shut us down
 - **Truly Decentralized**: Security extends to the frontend, not just smart contracts
 
-### Deployment Steps
-
-1. **Build the application**:
-   ```bash
-   npm run build
-   ```
-
-2. **Deploy with PinMe**:
-   ```bash
-   # Install PinMe CLI (if not already installed)
-   npm install -g pinme
-
-   # Deploy to IPFS
-   pinme deploy ./dist
-
-   # Link to ENS domain (optional)
-   pinme link your-domain.eth
-   ```
-
-3. **Access your DeFront**:
-   - Via IPFS: `ipfs://<CID>`
-   - Via ENS: `your-domain.eth` (if linked)
-   - Via IPFS Gateway: `https://ipfs.io/ipfs/<CID>`
-
-### PinMe Configuration
-
-Create a `pinme.config.js` file in the root directory:
-
-```javascript
-export default {
-  // IPFS configuration
-  ipfs: {
-    gateway: 'https://ipfs.io',
-    pinningService: 'pinata', // or 'infura', 'web3.storage', etc.
-  },
-  
-  // ENS configuration (optional)
-  ens: {
-    domain: 'veritasdao.eth',
-    resolver: '0x...', // Your ENS resolver address
-  },
-  
-  // Build output directory
-  buildDir: './dist',
-}
-```
-
 ## 📁 Project Structure
 
 ```
 veritasdao/
-├── src/
-│   ├── components/
-│   │   ├── Navbar.jsx          # Navigation bar
-│   │   ├── Hero.jsx            # Hero section
-│   │   ├── Proposals.jsx       # Proposals voting section
-│   │   ├── Reports.jsx         # Published reports archive
-│   │   ├── SubmitProposal.jsx # Proposal submission form
-│   │   └── Network3D.jsx        # 3D background visualization
-│   ├── App.jsx                 # Main app component
+├── contracts/                 # Smart contracts (Solidity)
+│   ├── VeritasToken.sol       # ERC20 governance token
+│   ├── VeritasGovernor.sol    # DAO governance contract
+│   ├── Treasury.sol           # DAO treasury vault
+│   ├── DonationContract.sol   # Donation & escrow system
+│   ├── ArticleRegistry.sol    # On-chain article registry
+│   ├── ReputationContract.sol # Investigator reputation
+│   └── VeritasFaucet.sol      # Test token faucet
+├── src/                       # Frontend React application
+│   ├── components/            # React components
+│   │   ├── Dashboard.jsx      # Main dashboard
+│   │   ├── Proposals.jsx      # Proposals voting
+│   │   ├── Reports.jsx        # Published reports
+│   │   ├── SubmitProposal.jsx # Proposal submission
+│   │   ├── Network3D.jsx      # 3D visualization
+│   │   └── ...                # Other UI components
+│   ├── config/                # Configuration files
+│   │   ├── contracts.js       # Contract addresses & ABIs
+│   │   ├── wagmi.js           # Wagmi Web3 config
+│   │   └── abis.json          # Contract ABIs
+│   ├── contexts/              # React contexts
+│   │   ├── WalletContext.jsx  # Wallet connection
+│   │   └── ToastContext.jsx   # Toast notifications
+│   ├── hooks/                 # Custom React hooks
+│   │   └── useContracts.js    # Contract interaction hook
+│   ├── utils/                 # Utility functions
+│   │   ├── contractHelpers.js # Contract helpers
+│   │   └── metamaskNetwork.js # MetaMask network utils
+│   ├── App.jsx                # Main app component
 │   ├── main.jsx               # Entry point
 │   └── index.css              # Global styles
-├── public/                    # Static assets
-├── dist/                      # Build output (for PinMe deployment)
-├── package.json
-├── vite.config.js
-└── README.md
+├── scripts/                    # Deployment & utility scripts
+│   ├── deploy.js              # Contract deployment
+│   ├── sync-env.js            # Sync deployment addresses
+│   ├── copy-abis.js           # Copy ABIs to frontend
+│   └── ...                    # Other utility scripts
+├── test/                       # Smart contract tests
+├── public/                     # Static assets
+├── dist/                       # Build output (for PinMe)
+├── hardhat.config.js           # Hardhat configuration
+├── vite.config.js              # Vite configuration
+├── pinme.config.js             # PinMe deployment config
+└── package.json                # Dependencies & scripts
 ```
 
 ## 🎨 Design System

@@ -45,11 +45,6 @@ export function useContracts() {
         const addresses = getContractAddresses(chainId)
         const contractInstances = {}
 
-        console.log('Initializing contracts with addresses:', {
-          network: getNetwork(chainId),
-          chainId,
-          addresses
-        })
 
         // Skip contract existence check - just create contract instances directly
         // MetaMask provider will handle errors if contract doesn't exist
@@ -64,12 +59,9 @@ export function useContracts() {
               CONTRACT_ABIS.VeritasToken,
               signer || provider
             )
-            console.log('✓ VeritasToken contract instance created:', addresses.VeritasToken)
           } catch (error) {
-            console.warn('VeritasToken contract not available:', error.message)
           }
         } else {
-          console.warn('VeritasToken address is invalid or empty:', addresses.VeritasToken)
         }
 
         if (isValidAddress(addresses.VeritasGovernor)) {
@@ -79,7 +71,6 @@ export function useContracts() {
               CONTRACT_ABIS.VeritasGovernor,
               signer || provider
             )
-            console.log('✓ VeritasGovernor contract instance created:', addresses.VeritasGovernor)
           } catch (error) {
             console.error('VeritasGovernor contract not available:', {
               address: addresses.VeritasGovernor,
@@ -99,9 +90,7 @@ export function useContracts() {
               CONTRACT_ABIS.Treasury,
               signer || provider
             )
-            console.log('✓ Treasury contract instance created:', addresses.Treasury)
           } catch (error) {
-            console.warn('Treasury contract not available:', error.message)
           }
         }
 
@@ -112,9 +101,18 @@ export function useContracts() {
               CONTRACT_ABIS.VeritasFaucet,
               signer || provider
             )
-            console.log('✓ VeritasFaucet contract instance created:', addresses.VeritasFaucet)
           } catch (error) {
-            console.warn('VeritasFaucet contract not available:', error.message)
+          }
+        }
+
+        if (isValidAddress(addresses.JournalistRegistry)) {
+          try {
+            contractInstances.journalistRegistry = new ethers.Contract(
+              addresses.JournalistRegistry,
+              CONTRACT_ABIS.JournalistRegistry,
+              signer || provider
+            )
+          } catch (error) {
           }
         }
 
@@ -139,25 +137,21 @@ export function useContracts() {
   const getTokenBalance = useCallback(async (address) => {
     if (!address) return '0'
     if (!contracts.token) {
-      console.warn('Token contract not available')
       return '0'
     }
     
     // Get contract address
     const contractAddress = contracts.token.target || contracts.token.address
     if (!isValidContractAddress(contractAddress)) {
-      console.warn('Invalid token contract address:', contractAddress)
       return '0'
     }
     
     try {
       const balance = await contracts.token.balanceOf(address)
       const formatted = ethers.formatEther(balance || 0n)
-      console.log(`Token balance for ${address}:`, formatted)
       return formatted
     } catch (error) {
       // Silently fail if contract doesn't exist or not deployed
-      console.warn('Error getting token balance:', error.message)
       return '0'
     }
   }, [contracts.token, isValidContractAddress])
@@ -166,28 +160,36 @@ export function useContracts() {
   const getVotingPower = useCallback(async (address) => {
     if (!address) return '0'
     if (!contracts.token) {
-      console.warn('Token contract not available for voting power')
       return '0'
     }
     
     // Get contract address
     const contractAddress = contracts.token.target || contracts.token.address
     if (!isValidContractAddress(contractAddress)) {
-      console.warn('Invalid token contract address for voting power:', contractAddress)
       return '0'
     }
     
     try {
       const votes = await contracts.token.getVotes(address)
       const formatted = ethers.formatEther(votes || 0n)
-      console.log(`Voting power for ${address}:`, formatted)
       return formatted
     } catch (error) {
       // Silently fail if contract doesn't exist or not deployed
-      console.warn('Error getting voting power:', error.message)
       return '0'
     }
   }, [contracts.token, isValidContractAddress])
+  
+  // Get voting power at a specific block (for proposal snapshot)
+  const getVotingPowerAtBlock = useCallback(async (address, blockNumber) => {
+    if (!contracts.token) return '0'
+    try {
+      const votes = await contracts.token.getPastVotes(address, blockNumber)
+      return ethers.formatEther(votes)
+    } catch (error) {
+      console.error(`Error getting voting power at block ${blockNumber}:`, error)
+      return '0'
+    }
+  }, [contracts.token])
 
   // Request faucet tokens (for testnet/development)
   const requestFaucet = useCallback(async (address) => {
@@ -198,22 +200,15 @@ export function useContracts() {
     // Use Faucet contract if available
     if (contracts.faucet && signer) {
       try {
-        console.log('Using faucet contract:', contracts.faucet.target)
         
         // Skip all read calls - they're failing with MetaMask provider
         // Just try to call requestTokens() directly
         // The transaction will revert with a proper error message if there's an issue
         
         // Request tokens from faucet directly
-        console.log('Calling requestTokens()...')
         const tx = await contracts.faucet.requestTokens()
-        console.log('Transaction sent, hash:', tx.hash)
-        console.log('Waiting for confirmation...')
         
         const receipt = await tx.wait()
-        console.log('Transaction confirmed:', receipt)
-        console.log('Block number:', receipt.blockNumber)
-        console.log('Transaction status:', receipt.status)
         
         // Check if transaction reverted
         if (receipt.status === 0) {
@@ -222,7 +217,6 @@ export function useContracts() {
         
         // Check for revert reason in logs
         if (receipt.logs && receipt.logs.length === 0) {
-          console.warn('No events emitted - transaction may have reverted silently')
         }
         
         // Wait a bit for block to be finalized
@@ -232,14 +226,11 @@ export function useContracts() {
         if (contracts.token) {
           const balanceAfter = await contracts.token.balanceOf(address)
           const balanceFormatted = ethers.formatEther(balanceAfter)
-          console.log('Balance after faucet:', balanceFormatted, 'VERITAS')
           
           // If balance is still 0, check if faucet address is set
           if (parseFloat(balanceFormatted) === 0) {
             try {
               const faucetAddressInToken = await contracts.token.faucetAddress()
-              console.log('Faucet address in token contract:', faucetAddressInToken)
-              console.log('Current faucet contract address:', contracts.faucet.target)
               
               if (faucetAddressInToken.toLowerCase() !== contracts.faucet.target.toLowerCase()) {
                 throw new Error('Faucet address not set in token contract! Please contact the DAO administrator to set the faucet address.')
@@ -263,13 +254,6 @@ export function useContracts() {
           message: `${amountFormatted} VERITAS tokens received successfully! Transaction: ${tx.hash.slice(0, 10)}...` 
         }
       } catch (error) {
-        console.error('Faucet request error:', error)
-        console.error('Error details:', {
-          message: error.message,
-          code: error.code,
-          data: error.data,
-          reason: error.reason
-        })
         
         if (error.message && error.message.includes('Cooldown')) {
           throw error
@@ -388,15 +372,19 @@ export function useContracts() {
       throw new Error('Wallet not connected')
     }
     try {
-      console.log(`Calling castVote with proposalId: ${proposalId}, support: ${support}`)
       const tx = await contracts.governor.castVote(proposalId, support)
-      console.log('Vote transaction sent:', tx.hash)
       // Wait for at least 1 confirmation
       const receipt = await tx.wait(1)
-      console.log('Vote transaction confirmed:', receipt.blockNumber)
+      
+      // Immediately check vote count after confirmation
+      try {
+        const votes = await contracts.governor.proposalVotes(proposalId)
+      } catch (voteError) {
+      }
+      
       return tx.hash
     } catch (error) {
-      console.error('Error voting:', error)
+      console.error('[VOTE] Error voting:', error)
       throw error
     }
   }, [contracts.governor, signer])
@@ -422,16 +410,77 @@ export function useContracts() {
     if (!contracts.governor) return null
     try {
       const votes = await contracts.governor.proposalVotes(proposalId)
-      return {
+      const result = {
         against: ethers.formatEther(votes.againstVotes),
         for: ethers.formatEther(votes.forVotes),
         abstain: ethers.formatEther(votes.abstainVotes),
       }
+      return result
     } catch (error) {
       console.error('Error getting proposal votes:', error)
       return null
     }
   }, [contracts.governor])
+  
+  // Get all votes for a proposal by querying VoteCast events
+  const getProposalVotesFromEvents = useCallback(async (proposalId) => {
+    if (!contracts.governor || !provider) return null
+    try {
+      // VoteCast event: VoteCast(address indexed voter, uint256 indexed proposalId, uint8 support, uint256 weight, string reason)
+      // Filter by proposalId (second indexed parameter, first is null for voter)
+      let events = []
+      try {
+        const filter = contracts.governor.filters.VoteCast(null, proposalId)
+        events = await contracts.governor.queryFilter(filter)
+      } catch (filterError) {
+        // Fallback: query all VoteCast events and filter manually
+        const allEvents = await contracts.governor.queryFilter(contracts.governor.filters.VoteCast())
+        events = allEvents.filter(e => {
+          try {
+            const parsed = contracts.governor.interface.parseLog(e)
+            return parsed && parsed.args.proposalId && parsed.args.proposalId.toString() === proposalId
+          } catch {
+            return false
+          }
+        })
+      }
+      
+      
+      let totalFor = BigInt(0)
+      let totalAgainst = BigInt(0)
+      let totalAbstain = BigInt(0)
+      
+      events.forEach((event, index) => {
+        try {
+          const parsed = contracts.governor.interface.parseLog(event)
+          if (parsed && parsed.name === 'VoteCast') {
+            const support = parsed.args.support
+            const weight = parsed.args.weight
+            
+            if (support === 0) {
+              totalAgainst += weight
+            } else if (support === 1) {
+              totalFor += weight
+            } else if (support === 2) {
+              totalAbstain += weight
+            }
+          }
+        } catch (parseError) {
+        }
+      })
+      
+      const result = {
+        against: ethers.formatEther(totalAgainst),
+        for: ethers.formatEther(totalFor),
+        abstain: ethers.formatEther(totalAbstain),
+        eventCount: events.length
+      }
+      return result
+    } catch (error) {
+      console.error('[VOTES] Error getting votes from events:', error)
+      return null
+    }
+  }, [contracts.governor, provider])
 
   // Get proposal threshold
   const getProposalThreshold = useCallback(async () => {
@@ -449,9 +498,13 @@ export function useContracts() {
   const getAllProposals = useCallback(async () => {
     if (!contracts.governor || !provider) return []
     try {
+      // Force provider to use latest block
+      await provider.getBlockNumber() // This ensures we're using latest block
+      
       // Query ProposalCreated events
       const filter = contracts.governor.filters.ProposalCreated()
       const events = await contracts.governor.queryFilter(filter)
+      
       
       // Get details for each proposal
       const proposals = await Promise.all(
@@ -470,6 +523,98 @@ export function useContracts() {
               'Pending', 'Active', 'Canceled', 'Defeated',
               'Succeeded', 'Queued', 'Expired', 'Executed'
             ]
+            
+            // Get vote counts from contract (may not be accurate immediately after vote)
+            let contractVotesFor = parseFloat(ethers.formatEther(votes.forVotes))
+            let contractVotesAgainst = parseFloat(ethers.formatEther(votes.againstVotes))
+            let contractVotesAbstain = parseFloat(ethers.formatEther(votes.abstainVotes))
+            
+            
+            // ALWAYS use events as primary source - more reliable and includes all votes
+            let votesFor = contractVotesFor
+            let votesAgainst = contractVotesAgainst
+            let votesAbstain = contractVotesAbstain
+            
+            try {
+              // Query all VoteCast events and filter by proposalId (most reliable method)
+              const allVoteEvents = await contracts.governor.queryFilter(contracts.governor.filters.VoteCast())
+              const filteredEvents = allVoteEvents.filter(e => {
+                try {
+                  const parsed = contracts.governor.interface.parseLog(e)
+                  if (parsed && parsed.name === 'VoteCast') {
+                    const eventProposalId = parsed.args.proposalId ? parsed.args.proposalId.toString() : null
+                    return eventProposalId === proposalId
+                  }
+                  return false
+                } catch {
+                  return false
+                }
+              })
+              
+              if (filteredEvents.length > 0) {
+                // Count votes: Each vote = 10 VERITAS (fixed cost)
+                const VOTE_COST = 10
+                let voteCountFor = 0
+                let voteCountAgainst = 0
+                let voteCountAbstain = 0
+                
+                filteredEvents.forEach((event, index) => {
+                  try {
+                    const parsed = contracts.governor.interface.parseLog(event)
+                    if (parsed && parsed.name === 'VoteCast') {
+                      // Get all args from event
+                      const args = parsed.args
+                      const support = Number(args.support)
+                      const voter = args.voter
+                      
+                      // proposalId is the second indexed parameter in VoteCast event
+                      // VoteCast(address indexed voter, uint256 indexed proposalId, uint8 support, uint256 weight, string reason)
+                      let eventProposalId = null
+                      if (args.proposalId !== undefined) {
+                        eventProposalId = args.proposalId.toString()
+                      } else if (args.length >= 2) {
+                        // Fallback: try to get from args array
+                        eventProposalId = args[1] ? args[1].toString() : null
+                      }
+                      
+                      // Double check proposalId matches
+                      if (eventProposalId && eventProposalId !== proposalId) {
+                        return
+                      }
+                      
+                      const supportLabel = support === 0 ? 'AGAINST' : support === 1 ? 'FOR' : support === 2 ? 'ABSTAIN' : 'UNKNOWN'
+                      
+                      // Count votes (each vote = 10 VERITAS)
+                      if (support === 0) {
+                        voteCountAgainst++
+                      } else if (support === 1) {
+                        voteCountFor++
+                      } else if (support === 2) {
+                        voteCountAbstain++
+                      }
+                    }
+                  } catch (parseError) {
+                    // Silent fail for parse errors
+                  }
+                })
+                
+                // Calculate VERITAS amounts: votes × 10 VERITAS per vote
+                const eventVotesFor = voteCountFor * VOTE_COST
+                const eventVotesAgainst = voteCountAgainst * VOTE_COST
+                const eventVotesAbstain = voteCountAbstain * VOTE_COST
+                
+                
+                // ALWAYS use events as primary source (more reliable, includes all votes)
+                votesFor = eventVotesFor
+                votesAgainst = eventVotesAgainst
+                votesAbstain = eventVotesAbstain
+                
+              } else {
+                // No events found, use contract values
+              }
+            } catch (eventError) {
+              // Silent fail, use contract values
+            }
 
             // Parse description from event (if available)
             const description = event.args.description || ''
@@ -499,9 +644,9 @@ export function useContracts() {
               description: description,
               state: states[state],
               stateNumber: state,
-              votesFor: ethers.formatEther(votes.forVotes),
-              votesAgainst: ethers.formatEther(votes.againstVotes),
-              votesAbstain: ethers.formatEther(votes.abstainVotes),
+              votesFor: votesFor.toString(), // Use updated vote count (from events if mismatch)
+              votesAgainst: votesAgainst.toString(), // Use updated vote count (from events if mismatch)
+              votesAbstain: votesAbstain.toString(), // Use updated vote count (from events if mismatch)
               snapshot: snapshot.toString(),
               deadline: deadline.toString(),
               deadlineTimestamp: deadlineTimestamp,
@@ -562,13 +707,11 @@ export function useContracts() {
   // Get treasury balances
   const getTreasuryBalances = useCallback(async () => {
     if (!contracts.treasury || !contracts.token) {
-      console.warn('Treasury or token contract not available')
       return null
     }
     
     // Check if contract addresses are valid
     if (!isValidContractAddress(contracts.treasury.target) || !isValidContractAddress(contracts.token.target)) {
-      console.warn('Invalid contract addresses')
       return null
     }
 
@@ -628,6 +771,53 @@ export function useContracts() {
     }
   }, [contracts.governor, account, provider])
 
+  // Verify journalist
+  const verifyJournalist = useCallback(async () => {
+    if (!contracts.journalistRegistry || !signer) {
+      throw new Error('JournalistRegistry contract not available. Please check your network connection.')
+    }
+
+    try {
+      const tx = await contracts.journalistRegistry.verifyJournalist()
+      await tx.wait()
+      return { success: true, txHash: tx.hash }
+    } catch (error) {
+      console.error('Error verifying journalist:', error)
+      if (error.code === 4001) {
+        throw new Error('User rejected the transaction')
+      }
+      throw new Error(error.message || 'Failed to verify journalist')
+    }
+  }, [contracts.journalistRegistry, signer])
+
+  // Check if address is verified journalist
+  const isJournalistVerified = useCallback(async (address) => {
+    if (!address || !contracts.journalistRegistry) {
+      return false
+    }
+
+    try {
+      const verified = await contracts.journalistRegistry.isVerified(address)
+      return verified
+    } catch (error) {
+      return false
+    }
+  }, [contracts.journalistRegistry])
+
+  // Get verification timestamp
+  const getVerificationTimestamp = useCallback(async (address) => {
+    if (!address || !contracts.journalistRegistry) {
+      return null
+    }
+
+    try {
+      const timestamp = await contracts.journalistRegistry.verificationTimestamp(address)
+      return timestamp.toString() !== '0' ? Number(timestamp) * 1000 : null // Convert to milliseconds
+    } catch (error) {
+      return null
+    }
+  }, [contracts.journalistRegistry])
+
   return {
     provider,
     signer,
@@ -636,11 +826,16 @@ export function useContracts() {
     getTokenBalance,
     requestFaucet,
     getVotingPower,
+    getVotingPowerAtBlock,
     delegate,
     createProposal,
     vote,
     getProposalState,
     getProposalVotes,
+    getProposalVotesFromEvents,
+    verifyJournalist,
+    isJournalistVerified,
+    getVerificationTimestamp,
     getProposalThreshold,
     getAllProposals,
     getProposalDetails,

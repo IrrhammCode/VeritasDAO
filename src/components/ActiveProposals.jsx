@@ -8,7 +8,7 @@ import './ActiveProposals.css'
 
 function ActiveProposals() {
   const { account, chainId } = useWallet()
-  const { getAllProposals, vote, getVotingPower, isLoading: contractsLoading, contracts } = useContracts()
+  const { getAllProposals, vote, getVotingPower, getVotingPowerAtBlock, isLoading: contractsLoading, contracts } = useContracts()
   const { success, error: showError } = useToast()
   const [proposals, setProposals] = useState([])
   const [loading, setLoading] = useState(true)
@@ -16,7 +16,7 @@ function ActiveProposals() {
   const [error, setError] = useState(null)
   const [votingPower, setVotingPower] = useState('0')
 
-  useEffect(() => {
+  const fetchProposals = React.useCallback(async () => {
     if (contractsLoading) return
 
     // Check if on supported network
@@ -33,27 +33,78 @@ function ActiveProposals() {
       return
     }
 
-    const fetchProposals = async () => {
-      setLoading(true)
-      setError(null)
-      try {
-        const allProposals = await getAllProposals()
-        // Filter only active proposals
-        const activeProposals = allProposals.filter(p => p.state === 'Active')
-        setProposals(activeProposals)
-      } catch (error) {
-        console.error('Error fetching proposals:', error)
-        setError('Failed to load proposals. Please check your connection.')
-      } finally {
-        setLoading(false)
-      }
+    setLoading(true)
+    setError(null)
+    try {
+      const allProposals = await getAllProposals()
+      // Filter active and pending proposals (new proposals start as Pending)
+      const activeProposals = allProposals.filter(p => p.state === 'Active' || p.state === 'Pending')
+      setProposals(activeProposals)
+    } catch (error) {
+      console.error('Error fetching proposals:', error)
+      setError('Failed to load proposals. Please check your connection.')
+    } finally {
+      setLoading(false)
     }
+  }, [getAllProposals, contractsLoading, chainId, contracts])
 
+  useEffect(() => {
     fetchProposals()
     // Refresh every 30 seconds
     const interval = setInterval(fetchProposals, 30000)
     return () => clearInterval(interval)
-  }, [getAllProposals, contractsLoading, chainId, contracts])
+  }, [fetchProposals])
+
+  // Listen for proposal submission events to refresh
+  useEffect(() => {
+    const handleProposalSubmitted = (e) => {
+      // Wait for block confirmation (usually 1-2 blocks on Sepolia)
+      setTimeout(() => {
+        fetchProposals()
+      }, 5000) // Wait 5 seconds for block confirmation
+      
+      // Refresh again after 15 seconds to ensure it's picked up
+      setTimeout(() => {
+        fetchProposals()
+      }, 15000)
+    }
+
+    const handleStorageChange = (e) => {
+      if (e.key === 'lastProposalSubmitted') {
+        setTimeout(() => {
+          fetchProposals()
+        }, 5000)
+      }
+    }
+
+    // Listen for custom event
+    window.addEventListener('proposalSubmitted', handleProposalSubmitted)
+    // Listen for storage events (cross-tab)
+    window.addEventListener('storage', handleStorageChange)
+    
+    // Also check localStorage on mount/update
+    const checkLastSubmission = () => {
+      try {
+        const lastSubmission = localStorage.getItem('lastProposalSubmitted')
+        if (lastSubmission) {
+          const data = JSON.parse(lastSubmission)
+          // If submission was less than 30 seconds ago, refresh
+          if (Date.now() - data.timestamp < 30000) {
+            fetchProposals()
+          }
+        }
+      } catch (error) {
+        console.error('Error checking last submission:', error)
+      }
+    }
+    
+    checkLastSubmission()
+    
+    return () => {
+      window.removeEventListener('proposalSubmitted', handleProposalSubmitted)
+      window.removeEventListener('storage', handleStorageChange)
+    }
+  }, [fetchProposals])
 
   // Check voting power
   useEffect(() => {
@@ -80,49 +131,85 @@ function ActiveProposals() {
       return
     }
 
-    // Check voting power before voting
-    if (contracts.token) {
-      const power = await getVotingPower(account)
-      const powerNum = parseFloat(power || '0')
-      
-      if (powerNum === 0) {
-        showError('You need voting power to vote. Delegate your VERITAS tokens first to activate voting power.')
-        return
+    // Find the proposal to check its snapshot block
+    const proposal = proposals.find(p => p.id === proposalId)
+    if (!proposal) {
+      showError('Proposal not found')
+      return
+    }
+
+    // Check if user already voted on THIS proposal
+    if (proposal.hasVoted) {
+      showError('You have already voted on this proposal')
+      return
+    }
+
+    // Check voting power at the proposal's snapshot block (IMPORTANT: each proposal has its own snapshot)
+    let votingPowerAtSnapshot = '0'
+    if (contracts.token && getVotingPowerAtBlock && proposal.snapshot) {
+      try {
+        votingPowerAtSnapshot = await getVotingPowerAtBlock(account, proposal.snapshot)
+        const powerAtSnapshotNum = parseFloat(votingPowerAtSnapshot || '0')
+        
+        if (powerAtSnapshotNum === 0) {
+          showError(
+            `⚠️ Your voting power was 0 at this proposal's snapshot block (${proposal.snapshot}). ` +
+            `Your vote will not be counted! You must delegate your VERITAS tokens BEFORE a proposal is created. ` +
+            `Please delegate your tokens and wait for the next proposal.`
+          )
+          return
+        }
+      } catch (error) {
+        // Continue anyway - let the contract handle it
       }
     }
 
     setVoting(prev => ({ ...prev, [proposalId]: support }))
     try {
-      // Support: 0 = Against, 1 = For, 2 = Abstain
-      console.log(`Voting on proposal ${proposalId} with support: ${support} (0=Against, 1=For, 2=Abstain)`)
       const txHash = await vote(proposalId, support)
-      console.log('Vote transaction hash:', txHash)
-      success(`Vote submitted! Transaction: ${txHash.slice(0, 10)}...`)
+      
+      // Each vote costs 10 VERITAS (fixed)
+      const VOTE_COST = 10
+      success(`Vote submitted! This vote costs ${VOTE_COST} VERITAS. Transaction: ${txHash.slice(0, 10)}...`)
+      
+      // Dispatch event to notify MyOverview to refresh voting power
+      window.dispatchEvent(new CustomEvent('voteCast', { 
+        detail: { proposalId, support, txHash, votingPower: votingPowerAtSnapshot, voteCost: VOTE_COST } 
+      }))
       
       // Wait for block confirmation and refresh proposals multiple times
-      // First refresh after 3 seconds
+      // First refresh after 5 seconds (wait for block confirmation)
       setTimeout(async () => {
         try {
           const allProposals = await getAllProposals()
-          const activeProposals = allProposals.filter(p => p.state === 'Active')
+          const activeProposals = allProposals.filter(p => p.state === 'Active' || p.state === 'Pending')
           setProposals(activeProposals)
-          console.log('Proposals refreshed after vote')
           
-          // Refresh again after another 5 seconds to ensure votes are updated
+          // Refresh again after another 8 seconds to ensure all votes are updated
           setTimeout(async () => {
             try {
               const allProposals2 = await getAllProposals()
-              const activeProposals2 = allProposals2.filter(p => p.state === 'Active')
+              const activeProposals2 = allProposals2.filter(p => p.state === 'Active' || p.state === 'Pending')
               setProposals(activeProposals2)
-              console.log('Proposals refreshed again after vote (second refresh)')
+              
+              // Final refresh after 15 seconds total
+              setTimeout(async () => {
+                try {
+                  const allProposals3 = await getAllProposals()
+                  const activeProposals3 = allProposals3.filter(p => p.state === 'Active' || p.state === 'Pending')
+                  setProposals(activeProposals3)
+                } catch (err) {
+                  console.error('Error in final refresh:', err)
+                }
+              }, 7000)
             } catch (err) {
               console.error('Error in second refresh:', err)
             }
-          }, 5000)
+          }, 8000)
         } catch (err) {
           console.error('Error refreshing proposals:', err)
         }
-      }, 3000)
+      }, 5000)
     } catch (error) {
       console.error('Error voting:', error)
       showError(error.message || 'Failed to submit vote')
@@ -214,7 +301,29 @@ function ActiveProposals() {
 
   return (
     <div className="active-proposals">
-      <h2 className="section-title">Active Proposals (Needs Your Vote)</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <h2 className="section-title">Active Proposals (Needs Your Vote)</h2>
+        <motion.button
+          onClick={fetchProposals}
+          disabled={loading}
+          style={{
+            padding: '0.5rem 1rem',
+            background: 'var(--accent-blue)',
+            color: '#fff',
+            border: '1px solid var(--border-color)',
+            borderRadius: '8px',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            opacity: loading ? 0.6 : 1,
+            fontSize: '0.875rem',
+            fontWeight: 600,
+            boxShadow: 'var(--shadow-emboss)'
+          }}
+          whileHover={!loading ? { scale: 1.05 } : {}}
+          whileTap={!loading ? { scale: 0.95 } : {}}
+        >
+          {loading ? 'Refreshing...' : '🔄 Refresh'}
+        </motion.button>
+      </div>
       
       <div className="proposals-list">
         {proposals.map((proposal, index) => {
@@ -222,7 +331,10 @@ function ActiveProposals() {
           const percentages = calculateVotePercentages(proposal.votesFor, proposal.votesAgainst, proposal.votesAbstain || 0)
           const isVoting = voting[proposal.id] !== undefined
           const hasVoted = proposal.hasVoted
+          // Total votes in VERITAS (each vote = 10 VERITAS)
           const totalVotes = parseFloat(proposal.votesFor) + parseFloat(proposal.votesAgainst) + parseFloat(proposal.votesAbstain || 0)
+          // Calculate number of votes (total VERITAS / 10)
+          const totalVoteCount = Math.round(totalVotes / 10)
 
           return (
             <motion.div
@@ -238,9 +350,9 @@ function ActiveProposals() {
                 <div className="proposal-id-wrapper">
                   <span className="proposal-id">Proposal #{proposal.id.length > 20 ? `${proposal.id.slice(0, 10)}...${proposal.id.slice(-8)}` : proposal.id}</span>
                 </div>
-                <div className="proposal-status active-badge">
+                <div className={`proposal-status ${proposal.state === 'Active' ? 'active-badge' : proposal.state === 'Pending' ? 'pending-badge' : ''}`}>
                   <span className="status-dot"></span>
-                  Active
+                  {proposal.state}
                 </div>
               </div>
               
@@ -312,13 +424,23 @@ function ActiveProposals() {
               <div className="proposal-voting">
                 <div className="voting-header">
                   <h4 className="voting-title">Voting Progress</h4>
-                  <span className="total-votes">{totalVotes.toFixed(2)} VERITAS</span>
+                  <span className="total-votes">{totalVoteCount} vote{totalVoteCount !== 1 ? 's' : ''} ({totalVotes.toFixed(0)} VERITAS)</span>
                 </div>
                 
-                {/* Voting Power Warning */}
-                {account && parseFloat(votingPower || '0') === 0 && (
-                  <div className="voting-power-warning">
-                    <p>⚠️ <strong>No voting power available.</strong> Delegate your VERITAS tokens to activate voting power.</p>
+                {/* Voting Power Info */}
+                {account && proposal.snapshot && (
+                  <div className="voting-power-info" style={{ 
+                    padding: '0.75rem', 
+                    background: 'var(--bg-tertiary)', 
+                    borderRadius: '8px', 
+                    fontSize: '0.875rem',
+                    marginBottom: '1rem'
+                  }}>
+                    <p style={{ margin: 0 }}>
+                      💡 <strong>Note:</strong> Each vote costs <strong>10 VERITAS</strong>. 
+                      Your voting power is calculated at snapshot block {proposal.snapshot}. 
+                      Each proposal has its own snapshot, so you can vote on multiple proposals independently.
+                    </p>
                   </div>
                 )}
                 
@@ -396,9 +518,9 @@ function ActiveProposals() {
                 <motion.button
                   className="vote-button vote-yes"
                   onClick={() => handleVote(proposal.id, 1)}
-                  disabled={isVoting || hasVoted || parseFloat(votingPower || '0') === 0}
-                  whileHover={!isVoting && !hasVoted && parseFloat(votingPower || '0') > 0 ? { scale: 1.02, y: -2 } : {}}
-                  whileTap={!isVoting && !hasVoted && parseFloat(votingPower || '0') > 0 ? { scale: 0.98 } : {}}
+                  disabled={isVoting || hasVoted}
+                  whileHover={!isVoting && !hasVoted ? { scale: 1.02, y: -2 } : {}}
+                  whileTap={!isVoting && !hasVoted ? { scale: 0.98 } : {}}
                 >
                   <span className="button-icon">✓</span>
                   <span className="button-text">
@@ -408,9 +530,9 @@ function ActiveProposals() {
                 <motion.button
                   className="vote-button vote-no"
                   onClick={() => handleVote(proposal.id, 0)}
-                  disabled={isVoting || hasVoted || parseFloat(votingPower || '0') === 0}
-                  whileHover={!isVoting && !hasVoted && parseFloat(votingPower || '0') > 0 ? { scale: 1.02, y: -2 } : {}}
-                  whileTap={!isVoting && !hasVoted && parseFloat(votingPower || '0') > 0 ? { scale: 0.98 } : {}}
+                  disabled={isVoting || hasVoted}
+                  whileHover={!isVoting && !hasVoted ? { scale: 1.02, y: -2 } : {}}
+                  whileTap={!isVoting && !hasVoted ? { scale: 0.98 } : {}}
                 >
                   <span className="button-icon">✗</span>
                   <span className="button-text">
@@ -420,9 +542,9 @@ function ActiveProposals() {
                 <motion.button
                   className="vote-button vote-abstain"
                   onClick={() => handleVote(proposal.id, 2)}
-                  disabled={isVoting || hasVoted || parseFloat(votingPower || '0') === 0}
-                  whileHover={!isVoting && !hasVoted && parseFloat(votingPower || '0') > 0 ? { scale: 1.02, y: -2 } : {}}
-                  whileTap={!isVoting && !hasVoted && parseFloat(votingPower || '0') > 0 ? { scale: 0.98 } : {}}
+                  disabled={isVoting || hasVoted}
+                  whileHover={!isVoting && !hasVoted ? { scale: 1.02, y: -2 } : {}}
+                  whileTap={!isVoting && !hasVoted ? { scale: 0.98 } : {}}
                 >
                   <span className="button-icon">○</span>
                   <span className="button-text">

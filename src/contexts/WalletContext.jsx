@@ -18,7 +18,6 @@ export function WalletProvider({ children }) {
     if (isConnected && chainId === 11155111 && window.ethereum) {
       // Ensure network name is "Sepolia" not "Aeneid"
       ensureSepoliaNetwork().catch(err => {
-        console.warn('Could not ensure Sepolia network name:', err)
       })
     }
   }, [isConnected, chainId])
@@ -60,7 +59,6 @@ export function WalletProvider({ children }) {
           }
         } catch (networkError) {
           // If network setup fails, continue with connection anyway
-          console.warn('Could not ensure Sepolia network, continuing with connection:', networkError)
         }
       }
 

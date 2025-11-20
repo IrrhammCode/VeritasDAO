@@ -9,7 +9,7 @@ import './Proposals.css'
 
 function Proposals() {
   const { account, chainId } = useWallet()
-  const { getAllProposals, vote, isLoading: contractsLoading, contracts } = useContracts()
+  const { getAllProposals, vote, getVotingPower, getVotingPowerAtBlock, getProposalVotes, isLoading: contractsLoading, contracts } = useContracts()
   const { success, error: showError } = useToast()
   const [proposals, setProposals] = useState([])
   const [loading, setLoading] = useState(true)
@@ -71,13 +71,79 @@ function Proposals() {
       return
     }
 
+    // Check voting power at proposal snapshot block (IMPORTANT!)
+    let votingPower = '0'
+    let votingPowerAtSnapshot = '0'
+    
+    if (contracts.token && getVotingPower && getVotingPowerAtBlock && proposal) {
+      try {
+        // Check current voting power
+        votingPower = await getVotingPower(account)
+        const powerNum = parseFloat(votingPower || '0')
+        // Check voting power at snapshot block (this is what matters!)
+        if (proposal.snapshot) {
+          votingPowerAtSnapshot = await getVotingPowerAtBlock(account, proposal.snapshot)
+          const powerAtSnapshotNum = parseFloat(votingPowerAtSnapshot || '0')
+          
+          if (powerAtSnapshotNum === 0) {
+            showError(
+              `⚠️ Your voting power was 0 at the proposal snapshot block (${proposal.snapshot}). ` +
+              `Your vote will not be counted! You must delegate your VERITAS tokens BEFORE a proposal is created. ` +
+              `Current voting power: ${votingPower} VERITAS. Please delegate your tokens and wait for the next proposal.`
+            )
+            return
+          }
+        }
+        
+        // Also check current voting power as secondary check
+        if (powerNum === 0) {
+          showError('You need voting power to vote. Delegate your VERITAS tokens first to activate voting power.')
+          return
+        }
+      } catch (error) {
+        console.error('Error checking voting power:', error)
+        // Continue anyway, let the contract handle it
+      }
+    }
+
     // Convert voteType to support: 'for' = 1, 'against' = 0
     const support = voteType === 'for' ? 1 : 0
     setVoting(prev => ({ ...prev, [proposalId]: support }))
 
     try {
+      const effectivePower = votingPowerAtSnapshot || votingPower
       const txHash = await vote(proposalId, support)
-      success(`Vote submitted! Transaction: ${txHash.slice(0, 10)}...`)
+      success(
+        `Vote submitted! Transaction: ${txHash.slice(0, 10)}... ` +
+        `Using ${parseFloat(effectivePower).toFixed(2)} VERITAS voting power (at snapshot block). ` +
+        `Vote count will update shortly.`
+      )
+      
+      // Immediately try to get updated vote count after transaction confirmation
+      if (getProposalVotes) {
+        setTimeout(async () => {
+          try {
+            const voteData = await getProposalVotes(proposalId)
+            if (voteData) {
+              // Update the specific proposal in state
+              setProposals(prevProposals => 
+                prevProposals.map(p => 
+                  p.id === proposalId 
+                    ? { 
+                        ...p, 
+                        votesFor: voteData.for, 
+                        votesAgainst: voteData.against,
+                        votesAbstain: voteData.abstain || '0',
+                        hasVoted: true
+                      }
+                    : p
+                )
+              )
+            }
+          } catch (err) {
+          }
+        }, 2000) // Wait 2 seconds after transaction confirmation
+      }
       
       // Track voter in localStorage for early access
       const allVotes = JSON.parse(localStorage.getItem('proposal_votes') || '[]')
@@ -95,11 +161,39 @@ function Proposals() {
       filteredVotes.push(voteRecord)
       localStorage.setItem('proposal_votes', JSON.stringify(filteredVotes))
       
-      // Refresh proposals after vote
+      // Wait for block confirmation and refresh proposals multiple times
+      // First refresh after 3 seconds (immediate after confirmation)
       setTimeout(async () => {
-        const allProposals = await getAllProposals()
-        setProposals(allProposals)
-      }, 2000)
+        try {
+          const allProposals = await getAllProposals()
+          const updatedProposal = allProposals.find(p => p.id === proposalId)
+          setProposals(allProposals)
+          
+          // Refresh again after another 5 seconds
+          setTimeout(async () => {
+            try {
+              const allProposals2 = await getAllProposals()
+              const updatedProposal2 = allProposals2.find(p => p.id === proposalId)
+              setProposals(allProposals2)
+              
+              // Final refresh after another 7 seconds
+              setTimeout(async () => {
+                try {
+                  const allProposals3 = await getAllProposals()
+                  const updatedProposal3 = allProposals3.find(p => p.id === proposalId)
+                  setProposals(allProposals3)
+                } catch (err) {
+                  console.error('[REFRESH] Error in final refresh:', err)
+                }
+              }, 7000)
+            } catch (err) {
+              console.error('[REFRESH] Error in second refresh:', err)
+            }
+          }, 5000)
+        } catch (err) {
+          console.error('[REFRESH] Error in first refresh:', err)
+        }
+      }, 3000)
     } catch (error) {
       console.error('Error voting:', error)
       showError(error.message || 'Failed to submit vote')
@@ -109,6 +203,20 @@ function Proposals() {
         delete newVoting[proposalId]
         return newVoting
       })
+    }
+  }
+
+  const handleRefresh = async () => {
+    setLoading(true)
+    try {
+      const allProposals = await getAllProposals()
+      setProposals(allProposals)
+      success('Proposals refreshed!')
+    } catch (error) {
+      console.error('Error refreshing proposals:', error)
+      showError('Failed to refresh proposals')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -154,8 +262,19 @@ function Proposals() {
     <section className="proposals-section">
       <div className="section-container">
         <div className="section-header">
-          <h1 className="section-title">Proposals</h1>
-          <p className="section-description">View and vote on all governance proposals</p>
+          <div>
+            <h1 className="section-title">Proposals</h1>
+            <p className="section-description">View and vote on all governance proposals</p>
+          </div>
+          <button 
+            className="refresh-button"
+            onClick={handleRefresh}
+            disabled={loading}
+            title="Refresh proposals"
+          >
+            <span className="refresh-icon">🔄</span>
+            Refresh
+          </button>
         </div>
 
         {/* Filter */}
@@ -191,9 +310,11 @@ function Proposals() {
         ) : (
           <div className="proposals-grid">
             {filteredProposals.map((proposal, index) => {
-              const totalVotes = parseFloat(proposal.votesFor) + parseFloat(proposal.votesAgainst)
+              const votesFor = parseFloat(proposal.votesFor || 0)
+              const votesAgainst = parseFloat(proposal.votesAgainst || 0)
+              const totalVotes = votesFor + votesAgainst
               const votesForPercent = totalVotes > 0 
-                ? (parseFloat(proposal.votesFor) / totalVotes) * 100 
+                ? (votesFor / totalVotes) * 100 
                 : 0
               const isVoting = voting[proposal.id] !== undefined
               const hasVoted = proposal.hasVoted
@@ -246,13 +367,15 @@ function Proposals() {
                       <div className="vote-stats">
                         <div className="vote-stat-item">
                           <span className="vote-icon vote-icon-for">✓</span>
-                          <span className="votes-for">{parseFloat(proposal.votesFor).toFixed(2)} VERITAS</span>
-                          <span className="vote-percent">{votesForPercent.toFixed(1)}%</span>
+                          <span className="vote-label">YES:</span>
+                          <span className="votes-for">{votesFor.toFixed(2)} VERITAS</span>
+                          <span className="vote-percent">({votesForPercent.toFixed(1)}%)</span>
                         </div>
                         <div className="vote-stat-item">
                           <span className="vote-icon vote-icon-against">✗</span>
-                          <span className="votes-against">{parseFloat(proposal.votesAgainst).toFixed(2)} VERITAS</span>
-                          <span className="vote-percent">{(100 - votesForPercent).toFixed(1)}%</span>
+                          <span className="vote-label">NO:</span>
+                          <span className="votes-against">{votesAgainst.toFixed(2)} VERITAS</span>
+                          <span className="vote-percent">({(100 - votesForPercent).toFixed(1)}%)</span>
                         </div>
                       </div>
                     </div>

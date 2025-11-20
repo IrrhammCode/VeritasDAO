@@ -7,7 +7,7 @@ import { isSupportedNetwork } from '../utils/contractHelpers'
 import { ethers } from 'ethers'
 import './DonateModal.css'
 
-function DonateModal({ proposal, isOpen, onClose }) {
+function DonateModal({ proposal, isOpen, onClose, onDonationSuccess }) {
   const { account, chainId } = useWallet()
   const { signer, provider } = useContracts()
   const { success, error: showError, info } = useToast()
@@ -142,8 +142,9 @@ function DonateModal({ proposal, isOpen, onClose }) {
       const receipt = await tx.wait()
 
       // Save donation record to localStorage for early access tracking
+      // Ensure proposalId is string for consistency
       const donationRecord = {
-        proposalId: proposal.id,
+        proposalId: String(proposal.id),
         amount: donationAmount,
         recipient: recipientAddress,
         txHash: tx.hash,
@@ -153,10 +154,23 @@ function DonateModal({ proposal, isOpen, onClose }) {
         donor: account // Track who donated
       }
 
+
       // Get existing donations
       const existingDonations = JSON.parse(localStorage.getItem('veritasDonations') || '[]')
+      
+      // Check if this donation already exists (prevent duplicates)
+      const isDuplicate = existingDonations.some(d => 
+        d.proposalId === proposal.id && 
+        d.txHash === tx.hash &&
+        d.donor && d.donor.toLowerCase() === account.toLowerCase()
+      )
+      
+      if (!isDuplicate) {
       existingDonations.push(donationRecord)
       localStorage.setItem('veritasDonations', JSON.stringify(existingDonations))
+      } else {
+        // Donation already exists, skip duplicate
+      }
 
       // Mark proposal as "donated" for this user - this will make it appear in Archive
       const donatedProposals = JSON.parse(localStorage.getItem('donatedProposals') || '[]')
@@ -165,7 +179,7 @@ function DonateModal({ proposal, isOpen, onClose }) {
         localStorage.setItem('donatedProposals', JSON.stringify(donatedProposals))
       }
 
-      success(`Donation successful! Transaction: ${tx.hash.slice(0, 10)}...`)
+      success(`Donation successful! Transaction: ${tx.hash.slice(0, 10)}... Amount: ${donationAmount} ETH`)
       success('This proposal has been added to your Archive. You can now view all updates!')
       
       if (earlyAccessPromised) {
@@ -175,7 +189,16 @@ function DonateModal({ proposal, isOpen, onClose }) {
       // Reset form
       setDonationAmount('')
       setEarlyAccessPromised(false)
+      
+      // Notify parent component about successful donation
+      if (onDonationSuccess) {
+        onDonationSuccess()
+      }
+      
+      // Wait a bit before closing to ensure localStorage is updated
+      setTimeout(() => {
       onClose()
+      }, 500)
     } catch (error) {
       console.error('Error donating:', error)
       showError(error.message || 'Failed to process donation. Please try again.')

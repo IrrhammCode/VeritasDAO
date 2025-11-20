@@ -1,10 +1,10 @@
 # VeritasDAO - Decentralized Journalism Platform
 
-> **100% Censorship-Resistant Frontend** - Deployed to IPFS via PinMe
+> **Full-Stack Decentralized Platform** - Complete Smart Contract Implementation + Censorship-Resistant Frontend
 
-🌐 **Live Demo**: [https://fb54bu4q.pinit.eth.limo/](https://fb54bu4q.pinit.eth.limo/)
+🌐 **Live Demo**: [https://jljniguy.pinit.eth.limo/](https://jljniguy.pinit.eth.limo/)
 
-VeritasDAO is the official frontend for a decentralized journalism guild, built to be 100% censorship-resistant by using PinMe to deploy a decentralized frontend (DeFront) to IPFS and ENS.
+VeritasDAO is a **complete full-stack decentralized platform** for funding, publishing, and permanently archiving investigative journalism. Unlike frontend-only solutions, VeritasDAO implements a complete on-chain governance system with OpenZeppelin contracts, combined with a censorship-resistant frontend deployed via PinMe to IPFS and ENS.
 
 ## 🎯 Mission
 
@@ -14,17 +14,33 @@ Investigative journalism is under threat. Journalists, whistleblowers, and activ
 
 ## ✨ Features
 
+### On-Chain Governance (Smart Contracts)
+- **Complete DAO Implementation**: OpenZeppelin Governor with full governance functionality
+- **Token-Based Voting**: ERC20Votes token with delegation support
+- **Secure Treasury**: Timelock-protected vault for DAO funds
+- **On-Chain Proposals**: All proposals, votes, and executions are on-chain and immutable
+
+### Frontend Features
 - **Proposal Submission**: Reporters can submit proposals to get funding for their next big story
-- **DAO Voting**: DAO Members can vote on which proposals to fund
+- **DAO Voting**: DAO Members can vote on which proposals to fund (on-chain)
 - **Permanent Archive**: The Public can read all published reports, free from the fear that they will one day disappear
 - **3D Visualizations**: Beautiful 3D network visualization representing decentralization
 - **Modern UI**: Sleek, professional design with dark mode theme
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 18 + Vite
+### Smart Contracts
+- **Solidity**: ^0.8.20
+- **OpenZeppelin**: Battle-tested governance contracts
+- **Hardhat**: Development and deployment framework
+- **Ethers.js**: Contract interaction library
+
+### Frontend
+- **React 18**: Modern UI framework
+- **Vite**: Fast build tool
 - **3D Graphics**: Three.js + React Three Fiber
 - **Animations**: Framer Motion
+- **Web3**: Wagmi + Ethers.js for blockchain integration
 - **Deployment**: PinMe (IPFS + ENS)
 - **Styling**: CSS3 with CSS Variables
 
@@ -49,17 +65,43 @@ npm run build
 
 The app will be available at `http://localhost:5173`
 
-## 📦 Deployment with PinMe
+## 🔗 Smart Contracts
 
-VeritasDAO is designed to be deployed as a **DeFront** (Decentralized Frontend) using PinMe.
+VeritasDAO implements a complete on-chain governance system using OpenZeppelin contracts. All contracts are deployed on Sepolia testnet and verified on Etherscan.
 
-### Why PinMe is Critical
+### Contract Addresses (Sepolia Testnet)
 
-A platform dedicated to "Veritas" (Truth) is useless if its own frontend is a single point of failure. By using PinMe, we deploy our entire web application to IPFS and link it via ENS, making our platform:
+| Contract | Address | Description |
+|----------|---------|-------------|
+| **VeritasToken** | [`0xf37670d29689A64468c59016d381Cc94Cff7c5A5`](https://sepolia.etherscan.io/address/0xf37670d29689A64468c59016d381Cc94Cff7c5A5) | ERC20 governance token with voting power delegation |
+| **VeritasGovernor** | [`0x533C686792CeFB4119340b9cb4941bAE03Eb69F7`](https://sepolia.etherscan.io/address/0x533C686792CeFB4119340b9cb4941bAE03Eb69F7) | DAO governance contract for proposals and voting |
+| **Treasury** | [`0x24897c95A7ef3975709c7D7c0294226b0ec7377d`](https://sepolia.etherscan.io/address/0x24897c95A7ef3975709c7D7c0294226b0ec7377d) | Secure vault for DAO funds (Timelock-protected) |
+| **TimelockController** | [`0x5883640bbd3DfFEDA9aD68b240d3f93b2651046F`](https://sepolia.etherscan.io/address/0x5883640bbd3DfFEDA9aD68b240d3f93b2651046F) | Execution delay controller (1 hour delay) |
+| **DonationContract** | [`0xB2aF504561B9855B5688d508f193247053D0C28D`](https://sepolia.etherscan.io/address/0xB2aF504561B9855B5688d508f193247053D0C28D) | Donation & escrow system for proposals |
+| **ArticleRegistry** | [`0x9C2A8DB18ca3F29cE343658488BC733423cbdc69`](https://sepolia.etherscan.io/address/0x9C2A8DB18ca3F29cE343658488BC733423cbdc69) | On-chain registry for published articles |
+| **ReputationContract** | [`0x23a6AD0dA1A1eF2A6DC8eeE3AF461C1aA4268db5`](https://sepolia.etherscan.io/address/0x23a6AD0dA1A1eF2A6DC8eeE3AF461C1aA4268db5) | Reputation tracking for journalists |
+| **VeritasFaucet** | [`0x5DFcD5C0d798bED2FE41b1C7d0E00B2aF9e76706`](https://sepolia.etherscan.io/address/0x5DFcD5C0d798bED2FE41b1C7d0E00B2aF9e76706) | Test token faucet (1000 VERITAS per request) |
+| **JournalistRegistry** | [`0x67AfD69E6e00c8D87E494AD9051186629A7662EE`](https://sepolia.etherscan.io/address/0x67AfD69E6e00c8D87E494AD9051186629A7662EE) | On-chain journalist verification registry |
 
-- **Tamper-Proof**: The UI cannot be hijacked by hackers
-- **Censorship-Resistant**: No single entity can shut us down
-- **Truly Decentralized**: Security extends to the frontend, not just smart contracts
+### Key Features
+
+- ✅ **On-Chain Governance**: All proposals, votes, and executions are on-chain and immutable
+- ✅ **Token-Based Voting**: ERC20Votes token with delegation support
+- ✅ **Secure Execution**: Timelock delay prevents immediate malicious actions
+- ✅ **Quorum & Thresholds**: Prevents spam and minority control
+- ✅ **Battle-Tested**: OpenZeppelin audited contracts
+
+## 📦 Deployment
+
+**Backend**: Smart contracts deployed on Ethereum Sepolia testnet  
+**Frontend**: Deployed to IPFS via PinMe (Decentralized Frontend)
+
+### PinMe Deployment
+
+The frontend is deployed as a **DeFront** (Decentralized Frontend) using PinMe, making it:
+- **Tamper-Proof**: Content-hash verified, cannot be hijacked
+- **Censorship-Resistant**: No single entity can shut it down
+- **Truly Decentralized**: Full-stack decentralization from contracts to UI
 
 ## 📁 Project Structure
 
@@ -120,9 +162,26 @@ The application uses a dark theme with the following color palette:
 - **Accent Purple**: `#8b5cf6`
 - **Accent Green**: `#10b981`
 
-## 🔮 Future Vision
+## 🎯 What Makes VeritasDAO Different
 
-We plan to integrate this frontend with on-chain smart contracts to fully manage the DAO's treasury and voting process, creating a fully autonomous and unstoppable source for truth.
+**Full-Stack Decentralized Platform:**
+
+Unlike frontend-only solutions, VeritasDAO implements a complete decentralized platform:
+
+- ✅ **Smart Contracts**: Complete on-chain governance with 9 deployed contracts
+- ✅ **Frontend**: Censorship-resistant DeFront via PinMe (IPFS + ENS)
+- ✅ **Integration**: Seamless connection between contracts and UI
+- ✅ **Security**: Timelock, quorum, and proposal thresholds
+- ✅ **Battle-Tested**: OpenZeppelin audited contracts
+
+Everything is decentralized and on-chain - from governance to frontend.
+
+## 🔮 Future Enhancements
+
+- Cross-chain governance support
+- Enhanced reputation system
+- Mobile app for on-the-go access
+- Advanced analytics and reporting
 
 ## 📝 License
 

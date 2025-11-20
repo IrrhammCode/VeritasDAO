@@ -19,9 +19,7 @@ function LandingPage() {
 
   const handleWalletConnect = async () => {
     try {
-      console.log('Starting wallet connection...')
-      const result = await connect()
-      console.log('Connect result:', result)
+      await connect()
       
       // Wagmi connect is async but doesn't return account immediately
       // Account will be updated via wagmi hooks automatically

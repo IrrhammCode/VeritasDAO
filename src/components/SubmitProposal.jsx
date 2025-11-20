@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useWallet } from '../contexts/WalletContext'
 import { useContracts } from '../hooks/useContracts'
@@ -10,7 +10,7 @@ import './SubmitProposal.css'
 
 function SubmitProposal() {
   const { account } = useWallet()
-  const { createProposal, getProposalThreshold, getTokenBalance, contracts, isLoading: contractsLoading } = useContracts()
+  const { createProposal, getProposalThreshold, getTokenBalance, isJournalistVerified, contracts, isLoading: contractsLoading } = useContracts()
   const { success, error: showError, info } = useToast()
   
   const [formData, setFormData] = useState({
@@ -30,6 +30,8 @@ function SubmitProposal() {
   const [proposalThreshold, setProposalThreshold] = useState('0')
   const [tokenBalance, setTokenBalance] = useState('0')
   const [hasEnoughTokens, setHasEnoughTokens] = useState(false)
+  const [isVerifiedJournalist, setIsVerifiedJournalist] = useState(false)
+  const [isCheckingVerification, setIsCheckingVerification] = useState(true)
 
   // Load proposal threshold and check token balance
   React.useEffect(() => {
@@ -52,7 +54,28 @@ function SubmitProposal() {
       setTokenBalance('0')
       setHasEnoughTokens(false)
     }
-  }, [contracts.governor, contracts.token, account, getProposalThreshold, getTokenBalance, proposalThreshold])
+
+    // Check if user is verified journalist
+    const checkVerification = async () => {
+      if (account && contracts.journalistRegistry) {
+        try {
+          setIsCheckingVerification(true)
+          const verified = await isJournalistVerified(account)
+          setIsVerifiedJournalist(verified)
+        } catch (error) {
+          console.error('Error checking verification:', error)
+          setIsVerifiedJournalist(false)
+        } finally {
+          setIsCheckingVerification(false)
+        }
+      } else {
+        setIsVerifiedJournalist(false)
+        setIsCheckingVerification(false)
+      }
+    }
+    
+    checkVerification()
+  }, [contracts.governor, contracts.token, contracts.journalistRegistry, account, getProposalThreshold, getTokenBalance, proposalThreshold, isJournalistVerified])
 
   const handleChange = (e) => {
     setFormData({
@@ -66,6 +89,18 @@ function SubmitProposal() {
     
     if (!account) {
       showError('Please connect your wallet first')
+      return
+    }
+
+    // Check if user is verified journalist
+    if (!isVerifiedJournalist) {
+      showError('Only verified journalists can submit proposals. Please verify your journalist status first.')
+      return
+    }
+
+    // Check token requirement
+    if (proposalThreshold !== '0' && !hasEnoughTokens) {
+      showError(`You need at least ${proposalThreshold} VERITAS tokens to create a proposal. Your balance: ${parseFloat(tokenBalance || '0').toFixed(2)} VERITAS. Please get more tokens from the faucet.`)
       return
     }
 
@@ -188,6 +223,20 @@ function SubmitProposal() {
           readVisibility: 'none',
           articleContent: ''
         })
+        
+        // Trigger refresh of proposals list
+        // Dispatch custom event to notify other components
+        window.dispatchEvent(new CustomEvent('proposalSubmitted', { 
+          detail: { proposalId: result.proposalId, txHash: result.txHash } 
+        }))
+        
+        // Also trigger via localStorage change (for cross-tab communication)
+        localStorage.setItem('lastProposalSubmitted', JSON.stringify({
+          proposalId: result.proposalId,
+          txHash: result.txHash,
+          timestamp: Date.now()
+        }))
+        
         setTimeout(() => {
           setSubmitted(false)
         }, 5000)
@@ -212,7 +261,26 @@ function SubmitProposal() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="section-title">Submit a Proposal</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+            <h2 className="section-title">Submit a Proposal</h2>
+            {isVerifiedJournalist && account && (
+              <span className="verified-journalist-badge" style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: '#fff',
+                padding: '0.5rem 1rem',
+                borderRadius: '20px',
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
+              }}>
+                <span>✓</span>
+                Verified Journalist
+              </span>
+            )}
+          </div>
           <p className="section-description">
             Request funding for your investigative journalism project. All proposals 
             will be reviewed and voted on by DAO members.
@@ -442,6 +510,34 @@ function SubmitProposal() {
               )}
 
               <div className="form-info">
+                {account && !isCheckingVerification && (
+                  <div className="journalist-requirement" style={{
+                    background: isVerifiedJournalist ? 'rgba(42, 111, 151, 0.1)' : 'rgba(214, 40, 40, 0.1)',
+                    border: `1px solid ${isVerifiedJournalist ? 'rgba(42, 111, 151, 0.3)' : 'rgba(214, 40, 40, 0.3)'}`,
+                    borderRadius: '8px',
+                    padding: '1rem',
+                    marginBottom: '1rem'
+                  }}>
+                    {isVerifiedJournalist ? (
+                      <div>
+                        <p style={{ color: 'var(--accent-blue)', margin: '0 0 0.5rem 0', fontWeight: 600 }}>
+                          ✓ Verified Journalist
+                        </p>
+                        {!hasEnoughTokens && proposalThreshold !== '0' && (
+                          <p style={{ color: 'var(--color-warning)', margin: 0, fontSize: '0.875rem' }}>
+                            ⚠ You still need at least {proposalThreshold} VERITAS tokens to submit a proposal. 
+                            Get tokens from the faucet in Dashboard.
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <p style={{ color: 'var(--color-error)', margin: 0 }}>
+                        <strong>⚠ Journalist Verification Required:</strong> Only verified journalists can submit proposals. 
+                        Please verify your journalist status in the Dashboard first.
+                      </p>
+                    )}
+                  </div>
+                )}
                 {proposalThreshold !== '0' && (
                   <div className="token-requirement">
                     <p>
@@ -466,11 +562,19 @@ function SubmitProposal() {
               <motion.button
                 type="submit"
                 className="submit-button"
-                disabled={isSubmitting || !account || contractsLoading || (!hasEnoughTokens && proposalThreshold !== '0')}
-                whileHover={!isSubmitting && !contractsLoading ? { scale: 1.02, boxShadow: '0 0 30px var(--glow-blue)' } : {}}
-                whileTap={!isSubmitting && !contractsLoading ? { scale: 0.98 } : {}}
+                disabled={isSubmitting || !account || contractsLoading || !isVerifiedJournalist || isCheckingVerification || (!hasEnoughTokens && proposalThreshold !== '0')}
+                whileHover={!isSubmitting && !contractsLoading && isVerifiedJournalist && hasEnoughTokens ? { scale: 1.02, boxShadow: '0 0 30px var(--glow-blue)' } : {}}
+                whileTap={!isSubmitting && !contractsLoading && isVerifiedJournalist && hasEnoughTokens ? { scale: 0.98 } : {}}
               >
-                {isSubmitting ? 'Submitting...' : 'Submit Proposal to DAO'}
+                {isSubmitting 
+                  ? 'Submitting...' 
+                  : isCheckingVerification
+                  ? 'Checking Verification...'
+                  : !isVerifiedJournalist
+                  ? 'Verify Journalist First'
+                  : !hasEnoughTokens && proposalThreshold !== '0'
+                  ? `Need ${proposalThreshold} VERITAS Tokens`
+                  : 'Submit Proposal to DAO'}
               </motion.button>
               
               {!account && (

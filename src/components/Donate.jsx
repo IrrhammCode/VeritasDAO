@@ -22,15 +22,36 @@ function Donate() {
 
   // Load donations from localStorage
   useEffect(() => {
-    const savedDonations = JSON.parse(localStorage.getItem('veritasDonations') || '[]')
-    const donationsMap = {}
-    savedDonations.forEach(donation => {
-      if (!donationsMap[donation.proposalId]) {
-        donationsMap[donation.proposalId] = []
+    const loadDonations = () => {
+      const savedDonations = JSON.parse(localStorage.getItem('veritasDonations') || '[]')
+      
+      const donationsMap = {}
+      savedDonations.forEach(donation => {
+        // Ensure proposalId is string for consistency
+        const proposalId = String(donation.proposalId)
+        if (!donationsMap[proposalId]) {
+          donationsMap[proposalId] = []
+        }
+        donationsMap[proposalId].push(donation)
+      })
+      
+      setDonations(donationsMap)
+    }
+    
+    loadDonations()
+    
+    // Listen for storage changes (when donation is saved in another tab/window)
+    const handleStorageChange = (e) => {
+      if (e.key === 'veritasDonations') {
+        loadDonations()
       }
-      donationsMap[donation.proposalId].push(donation)
-    })
-    setDonations(donationsMap)
+    }
+    
+    window.addEventListener('storage', handleStorageChange)
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+    }
   }, [])
 
   useEffect(() => {
@@ -82,32 +103,65 @@ function Donate() {
   const handleDonateClose = () => {
     setDonateModalOpen(false)
     setSelectedProposalForDonate(null)
-    // Reload donations
-    const savedDonations = JSON.parse(localStorage.getItem('veritasDonations') || '[]')
-    const donationsMap = {}
-    savedDonations.forEach(donation => {
-      if (!donationsMap[donation.proposalId]) {
-        donationsMap[donation.proposalId] = []
-      }
-      donationsMap[donation.proposalId].push(donation)
-    })
-    setDonations(donationsMap)
+    
+    // Force reload donations from localStorage
+    const reloadDonations = () => {
+      const savedDonations = JSON.parse(localStorage.getItem('veritasDonations') || '[]')
+      
+      const donationsMap = {}
+      savedDonations.forEach(donation => {
+        // Ensure proposalId is string for consistency
+        const proposalId = String(donation.proposalId)
+        if (!donationsMap[proposalId]) {
+          donationsMap[proposalId] = []
+        }
+        donationsMap[proposalId].push(donation)
+      })
+      
+      // Log summary
+      Object.keys(donationsMap).forEach(proposalId => {
+        const total = donationsMap[proposalId].reduce((sum, d) => sum + parseFloat(d.amount || 0), 0)
+      })
+      
+      setDonations(donationsMap)
+    }
+    
+    // Reload immediately
+    reloadDonations()
+    
+    // Also reload after a short delay to ensure localStorage is fully written
+    setTimeout(() => {
+      reloadDonations()
+    }, 500)
   }
 
   const getTotalDonations = (proposalId) => {
-    if (!donations[proposalId]) return 0
-    return donations[proposalId].reduce((sum, d) => sum + parseFloat(d.amount || 0), 0)
+    // Ensure proposalId is string for consistency
+    const id = String(proposalId)
+    if (!donations[id] || donations[id].length === 0) {
+      return 0
+    }
+    const total = donations[id].reduce((sum, d) => sum + parseFloat(d.amount || 0), 0)
+    return total
   }
 
   const getDonationCount = (proposalId) => {
-    if (!donations[proposalId]) return 0
-    return donations[proposalId].length
+    // Ensure proposalId is string for consistency
+    const id = String(proposalId)
+    if (!donations[id]) return 0
+    return donations[id].length
   }
 
   const hasDonated = (proposalId) => {
     if (!account) return false
-    if (!donations[proposalId]) return false
-    return donations[proposalId].some(d => d.recipient && d.txHash)
+    // Ensure proposalId is string for consistency
+    const id = String(proposalId)
+    if (!donations[id]) return false
+    return donations[id].some(d => 
+      d.donor && 
+      d.donor.toLowerCase() === account.toLowerCase() && 
+      d.txHash
+    )
   }
 
   const formatAddress = (address) => {
@@ -251,13 +305,15 @@ function Donate() {
         ) : (
           <div className="donate-proposals-grid">
             {sortedProposals.map((proposal, index) => {
-              const totalVotes = parseFloat(proposal.votesFor) + parseFloat(proposal.votesAgainst)
+              const totalVotes = parseFloat(proposal.votesFor || 0) + parseFloat(proposal.votesAgainst || 0)
               const votesForPercent = totalVotes > 0 
-                ? (parseFloat(proposal.votesFor) / totalVotes) * 100 
+                ? (parseFloat(proposal.votesFor || 0) / totalVotes) * 100 
                 : 0
-              const totalDonated = getTotalDonations(proposal.id)
-              const donationCount = getDonationCount(proposal.id)
-              const userDonated = hasDonated(proposal.id)
+              // Ensure proposalId is string for consistency
+              const proposalId = String(proposal.id)
+              const totalDonated = getTotalDonations(proposalId)
+              const donationCount = getDonationCount(proposalId)
+              const userDonated = hasDonated(proposalId)
 
               // Parse proposal title from description
               const description = proposal.description || ''
@@ -353,6 +409,19 @@ function Donate() {
         proposal={selectedProposalForDonate}
         isOpen={donateModalOpen}
         onClose={handleDonateClose}
+        onDonationSuccess={() => {
+          // Force reload donations immediately after successful donation
+          const savedDonations = JSON.parse(localStorage.getItem('veritasDonations') || '[]')
+          const donationsMap = {}
+          savedDonations.forEach(donation => {
+            const proposalId = String(donation.proposalId)
+            if (!donationsMap[proposalId]) {
+              donationsMap[proposalId] = []
+            }
+            donationsMap[proposalId].push(donation)
+          })
+          setDonations(donationsMap)
+        }}
       />
     </section>
   )

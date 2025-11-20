@@ -135,12 +135,31 @@
   letter-spacing: 0.05em;
 }
 
+.pending-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--bg-warning);
+  border: 1px solid var(--border-warning);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-warning);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .status-dot {
   width: 8px;
   height: 8px;
   background: var(--accent-green);
   border-radius: 50%;
   animation: pulse 2s infinite;
+}
+
+.pending-badge .status-dot {
+  background: var(--color-warning);
 }
 
 @keyframes pulse {

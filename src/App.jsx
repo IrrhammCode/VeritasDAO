@@ -44,11 +44,6 @@ function App() {
   // Show landing page if not connected, otherwise show app with navbar
   const isConnected = !!account
 
-  // Debug logging
-  useEffect(() => {
-    console.log('App: Account state changed:', account)
-    console.log('App: isConnected:', !!account)
-  }, [account])
 
   // Reset to landing page when wallet disconnects
   useEffect(() => {
@@ -58,7 +53,6 @@ function App() {
       setSelectedReportId(null)
     } else {
       // When wallet connects, go to dashboard
-      console.log('Account connected, redirecting to dashboard:', account)
       setActiveSection('dashboard')
     }
   }, [account])

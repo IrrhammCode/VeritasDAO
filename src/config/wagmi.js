@@ -24,7 +24,6 @@ const getSepoliaRpcUrl = () => {
   // Try to get from environment variable (for frontend, use VITE_ prefix)
   const customRpc = import.meta.env.VITE_SEPOLIA_RPC_URL
   if (customRpc) {
-    console.log('Using custom Sepolia RPC:', customRpc)
     return customRpc
   }
   // Fallback to default Sepolia RPCs

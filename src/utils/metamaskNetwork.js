@@ -34,7 +34,6 @@ export async function ensureSepoliaNetwork() {
       method: 'wallet_switchEthereumChain',
       params: [{ chainId: chainId }],
     })
-    console.log('Switched to Sepolia network')
   } catch (switchError) {
     // This error code indicates that the chain has not been added to MetaMask
     if (switchError.code === 4902) {
@@ -44,14 +43,12 @@ export async function ensureSepoliaNetwork() {
           method: 'wallet_addEthereumChain',
           params: [sepoliaNetwork],
         })
-        console.log('Added Sepolia network to MetaMask')
       } catch (addError) {
         console.error('Error adding Sepolia network:', addError)
         throw addError
       }
     } else if (switchError.code === -32002) {
       // Request already pending
-      console.log('Network switch request already pending')
     } else {
       // Network exists but might have wrong name
       // Try to update it by adding again (MetaMask will update if chainId matches)
@@ -60,7 +57,6 @@ export async function ensureSepoliaNetwork() {
           method: 'wallet_addEthereumChain',
           params: [sepoliaNetwork],
         })
-        console.log('Updated Sepolia network configuration in MetaMask')
       } catch (updateError) {
         console.error('Error updating Sepolia network:', updateError)
         // If update fails, try to switch anyway

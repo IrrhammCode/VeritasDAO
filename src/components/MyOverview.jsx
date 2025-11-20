@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { ethers } from 'ethers'
 import { useContracts } from '../hooks/useContracts'
 import { useWallet } from '../contexts/WalletContext'
 import { useToast } from '../contexts/ToastContext'
@@ -8,15 +9,18 @@ import './MyOverview.css'
 
 function MyOverview() {
   const { account, chainId } = useWallet()
-  const { getTokenBalance, getVotingPower, getUserActivity, delegate, requestFaucet, isLoading, contracts } = useContracts()
+  const { getTokenBalance, getVotingPower, getUserActivity, delegate, requestFaucet, isJournalistVerified, isLoading, contracts, getAllProposals } = useContracts()
   const { success, error: showError } = useToast()
   const [balance, setBalance] = useState('0')
   const [votingPower, setVotingPower] = useState('0')
+  const [usedVotingPower, setUsedVotingPower] = useState('0')
+  const [availableVotingPower, setAvailableVotingPower] = useState('0')
   const [activity, setActivity] = useState({ proposalsCreated: 0, votesCast: 0 })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [isDelegating, setIsDelegating] = useState(false)
   const [isRequestingFaucet, setIsRequestingFaucet] = useState(false)
+  const [isVerifiedJournalist, setIsVerifiedJournalist] = useState(false)
 
   useEffect(() => {
     if (!account || isLoading) {
@@ -45,41 +49,61 @@ function MyOverview() {
       setLoading(true)
       setError(null)
       try {
-        // Debug: Check contract availability
-        console.log('Fetching overview data for:', account)
-        console.log('Token contract available:', !!contracts.token)
-        console.log('Governor contract available:', !!contracts.governor)
-        
-        if (contracts.token) {
-          const tokenAddress = contracts.token.target || contracts.token.address
-          console.log('Token contract address:', tokenAddress)
-        }
         
         const [tokenBalance, votes, userActivity] = await Promise.all([
           getTokenBalance(account).catch((err) => {
-            console.warn('Error getting token balance:', err)
             return '0'
           }),
           getVotingPower(account).catch((err) => {
-            console.warn('Error getting voting power:', err)
             return '0'
           }),
           getUserActivity().catch(() => ({ proposalsCreated: 0, votesCast: 0 }))
         ])
         
-        console.log('Raw balance:', tokenBalance, 'Raw votes:', votes)
+        // Calculate used voting power from all votes cast
+        // Each vote costs 10 VERITAS (fixed amount)
+        const VOTE_COST = 10 // Fixed cost per vote in VERITAS
+        let totalUsedPower = 0
+        if (contracts.governor && account) {
+          try {
+            // Query all VoteCast events for this user
+            const voteFilter = contracts.governor.filters.VoteCast(account)
+            const voteEvents = await contracts.governor.queryFilter(voteFilter)
+            
+            // Each vote costs 10 VERITAS (fixed)
+            totalUsedPower = voteEvents.length * VOTE_COST
+          } catch (error) {
+            // Silent fail
+          }
+        }
         
         const balanceValue = parseFloat(tokenBalance || '0')
         const votesValue = parseFloat(votes || '0')
+        const usedPowerValue = totalUsedPower
         
         const finalBalance = isNaN(balanceValue) ? '0.00' : balanceValue.toFixed(2)
         const finalVotes = isNaN(votesValue) ? '0.00' : votesValue.toFixed(2)
-        
-        console.log('Final balance:', finalBalance, 'Final votes:', finalVotes)
+        const finalUsedPower = isNaN(usedPowerValue) ? '0.00' : usedPowerValue.toFixed(2)
+        const finalAvailablePower = Math.max(0, votesValue - usedPowerValue).toFixed(2)
         
         setBalance(finalBalance)
         setVotingPower(finalVotes)
+        setUsedVotingPower(finalUsedPower)
+        setAvailableVotingPower(finalAvailablePower)
         setActivity(userActivity || { proposalsCreated: 0, votesCast: 0 })
+        
+        // Check if user is verified journalist
+        if (account && contracts.journalistRegistry) {
+          try {
+            const verified = await isJournalistVerified(account)
+            setIsVerifiedJournalist(verified)
+          } catch (error) {
+            console.error('Error checking journalist verification:', error)
+            setIsVerifiedJournalist(false)
+          }
+        } else {
+          setIsVerifiedJournalist(false)
+        }
       } catch (error) {
         console.error('Error fetching overview data:', error)
         // Set to 0 instead of showing error, so user can still see the UI
@@ -96,7 +120,29 @@ function MyOverview() {
     }
 
     fetchData()
-  }, [account, chainId, getTokenBalance, getVotingPower, getUserActivity, isLoading, contracts, isSupportedNetwork])
+    
+    // Listen for vote events to refresh voting power
+    const handleVoteCast = () => {
+      setTimeout(() => {
+        fetchData()
+      }, 3000)
+    }
+    
+    // Listen for delegation events to refresh voting power
+    const handleDelegation = () => {
+      setTimeout(() => {
+        fetchData()
+      }, 3000)
+    }
+    
+    window.addEventListener('voteCast', handleVoteCast)
+    window.addEventListener('delegationUpdated', handleDelegation)
+    
+    return () => {
+      window.removeEventListener('voteCast', handleVoteCast)
+      window.removeEventListener('delegationUpdated', handleDelegation)
+    }
+  }, [account, chainId, getTokenBalance, getVotingPower, getUserActivity, isJournalistVerified, isLoading, contracts, isSupportedNetwork, getAllProposals])
 
   const handleFaucet = async () => {
     if (!account) {
@@ -105,9 +151,7 @@ function MyOverview() {
     }
     setIsRequestingFaucet(true)
     try {
-      console.log('Requesting faucet for:', account)
       const result = await requestFaucet(account)
-      console.log('Faucet request result:', result)
       success(result.message || 'Tokens received successfully!')
       
       // Refresh balance multiple times to ensure it updates
@@ -115,7 +159,6 @@ function MyOverview() {
         try {
           const newBalance = await getTokenBalance(account)
           const balanceValue = parseFloat(newBalance || '0')
-          console.log(`Balance check attempt ${attempt}:`, balanceValue)
           setBalance(balanceValue.toFixed(2))
           
           // If still 0 after 3 attempts, try a few more times with longer delays
@@ -150,11 +193,68 @@ function MyOverview() {
 
     setIsDelegating(true)
     try {
-      await delegate(account) // Delegate to self
-      success('Voting power delegated successfully!')
-      // Refresh voting power
-      const votes = await getVotingPower(account)
-      setVotingPower(parseFloat(votes || '0').toFixed(2))
+      const txHash = await delegate(account) // Delegate to self
+      success('Voting power delegated successfully! Transaction: ' + txHash.slice(0, 10) + '...')
+      
+      // Refresh voting power multiple times to ensure it updates
+      // Voting power update might take a few blocks to reflect
+      const refreshVotingPower = async (attempt = 1) => {
+        try {
+          // Get fresh voting power
+          const votes = await getVotingPower(account)
+          const votesValue = parseFloat(votes || '0')
+          
+          // Recalculate used and available power
+          // Each vote costs 10 VERITAS (fixed amount)
+          const VOTE_COST = 10 // Fixed cost per vote in VERITAS
+          let totalUsedPower = 0
+          if (contracts.governor && account) {
+            try {
+              // Query all VoteCast events for this user
+              const voteFilter = contracts.governor.filters.VoteCast(account)
+              const voteEvents = await contracts.governor.queryFilter(voteFilter)
+              
+              // Each vote costs 10 VERITAS (fixed)
+              totalUsedPower = voteEvents.length * VOTE_COST
+            } catch (error) {
+              // Silent fail
+            }
+          }
+          
+          const finalVotes = isNaN(votesValue) ? '0.00' : votesValue.toFixed(2)
+          const finalUsedPower = isNaN(totalUsedPower) ? '0.00' : totalUsedPower.toFixed(2)
+          const finalAvailablePower = Math.max(0, votesValue - totalUsedPower).toFixed(2)
+          
+          
+          setVotingPower(finalVotes)
+          setUsedVotingPower(finalUsedPower)
+          setAvailableVotingPower(finalAvailablePower)
+          
+          // If voting power is still 0 and we have balance, try again
+          if (votesValue === 0 && parseFloat(balance) > 0 && attempt < 5) {
+            setTimeout(() => refreshVotingPower(attempt + 1), 3000 * attempt)
+          }
+        } catch (error) {
+          console.error(`Error refreshing voting power (attempt ${attempt}):`, error)
+          // Retry if not last attempt
+          if (attempt < 3) {
+            setTimeout(() => refreshVotingPower(attempt + 1), 3000 * attempt)
+          }
+        }
+      }
+      
+      // First refresh after 2 seconds (wait for block confirmation)
+      setTimeout(() => refreshVotingPower(1), 2000)
+      // Second refresh after 5 seconds
+      setTimeout(() => refreshVotingPower(2), 5000)
+      // Third refresh after 10 seconds
+      setTimeout(() => refreshVotingPower(3), 10000)
+      
+      // Also dispatch event to trigger full data refresh
+      window.dispatchEvent(new CustomEvent('delegationUpdated', { 
+        detail: { account } 
+      }))
+      
     } catch (error) {
       console.error('Error delegating:', error)
       showError(error.message || 'Failed to delegate voting power')
@@ -174,7 +274,26 @@ function MyOverview() {
 
   return (
     <div className="my-overview">
-      <h2 className="section-title">My Overview</h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+        <h2 className="section-title">My Overview</h2>
+        {isVerifiedJournalist && account && (
+          <span className="verified-journalist-badge" style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            color: '#fff',
+            padding: '0.5rem 1rem',
+            borderRadius: '20px',
+            fontSize: '0.875rem',
+            fontWeight: '600',
+            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
+          }}>
+            <span>✓</span>
+            Verified Journalist
+          </span>
+        )}
+      </div>
       
       <div className="overview-cards">
         {/* Card 1: $VERITAS Balance */}
@@ -246,8 +365,48 @@ function MyOverview() {
               <div className="error-message">{error}</div>
             ) : (
               <>
-                <div className="card-value">{formatNumber(votingPower)}</div>
-                <div className="card-label">Votes</div>
+                <div className="card-value">{formatNumber(availableVotingPower)}</div>
+                <div className="card-label">Available Voting Power</div>
+                {parseFloat(votingPower) > 0 && (
+                  <div style={{ 
+                    fontSize: '0.75rem', 
+                    color: 'var(--text-secondary)', 
+                    marginTop: '0.5rem',
+                    padding: '0.5rem',
+                    background: 'var(--bg-tertiary)',
+                    borderRadius: '8px'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                      <span>Total Power:</span>
+                      <span>{formatNumber(votingPower)} VERITAS</span>
+                    </div>
+                    {parseFloat(usedVotingPower) > 0 && (
+                      <>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                          <span>Used ({Math.floor(parseFloat(usedVotingPower) / 10)} votes × 10 VERITAS):</span>
+                          <span style={{ color: 'var(--accent-red)' }}>-{formatNumber(usedVotingPower)} VERITAS</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '600', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border-color)' }}>
+                          <span>Available:</span>
+                          <span style={{ color: 'var(--accent-green)' }}>{formatNumber(availableVotingPower)} VERITAS</span>
+                        </div>
+                      </>
+                    )}
+                    {parseFloat(usedVotingPower) === 0 && (
+                      <div style={{ 
+                        marginTop: '0.5rem', 
+                        padding: '0.5rem', 
+                        background: 'rgba(16, 185, 129, 0.1)', 
+                        borderRadius: '6px',
+                        fontSize: '0.7rem'
+                      }}>
+                        <p style={{ margin: 0 }}>
+                          💡 Each vote costs <strong>10 VERITAS</strong>. You can cast {Math.floor(parseFloat(votingPower) / 10)} vote(s) with your current power.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
                 {parseFloat(votingPower) === 0 ? (
                   <>
                     {parseFloat(balance) === 0 ? (

@@ -15,6 +15,7 @@ export const CONTRACT_ADDRESSES = {
     ArticleRegistry: "", // Will be set after deployment
     ReputationContract: "", // Will be set after deployment
     VeritasFaucet: "", // Will be set after deployment
+    JournalistRegistry: "", // Will be set after deployment
   },
   // Sepolia testnet
   sepolia: {
@@ -26,6 +27,7 @@ export const CONTRACT_ADDRESSES = {
     ArticleRegistry: import.meta.env.VITE_ARTICLE_REGISTRY_ADDRESS || "",
     ReputationContract: import.meta.env.VITE_REPUTATION_CONTRACT_ADDRESS || "",
     VeritasFaucet: import.meta.env.VITE_FAUCET_ADDRESS || "",
+    JournalistRegistry: import.meta.env.VITE_JOURNALIST_REGISTRY_ADDRESS || "",
   },
   // Mainnet (when ready)
   mainnet: {
@@ -37,6 +39,7 @@ export const CONTRACT_ADDRESSES = {
     ArticleRegistry: "",
     ReputationContract: "",
     VeritasFaucet: "",
+    JournalistRegistry: "",
   },
 };
 
@@ -172,6 +175,16 @@ export const CONTRACT_ABIS = {
     "function getInvestigatorCount() view returns (uint256)",
     "function isInvestigator(address) view returns (bool)",
     "event ReputationUpdated(address indexed investigator, uint256 newScore, uint256 totalProposals, uint256 articlesPublished)",
+  ],
+  JournalistRegistry: fullABIs.JournalistRegistry || [
+    "function verifyJournalist()",
+    "function isVerified(address journalist) view returns (bool)",
+    "function verifiedJournalists(address) view returns (bool)",
+    "function verificationTimestamp(address) view returns (uint256)",
+    "function removeJournalist(address journalist)",
+    "function batchVerifyJournalists(address[] calldata journalists)",
+    "event JournalistVerified(address indexed journalist, uint256 timestamp)",
+    "event JournalistRemoved(address indexed journalist)",
   ],
 };
 

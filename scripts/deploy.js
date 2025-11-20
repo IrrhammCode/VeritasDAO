@@ -185,6 +185,14 @@ async function main() {
   await token.setFaucetAddress(faucetAddress);
   console.log("Faucet address set in VeritasToken");
 
+  // Step 11: Deploy JournalistRegistry
+  console.log("\n11. Deploying JournalistRegistry...");
+  const JournalistRegistry = await ethers.getContractFactory("JournalistRegistry");
+  const journalistRegistry = await JournalistRegistry.deploy(deployer.address);
+  await journalistRegistry.waitForDeployment();
+  const journalistRegistryAddress = await journalistRegistry.getAddress();
+  console.log("JournalistRegistry deployed to:", journalistRegistryAddress);
+
   // Summary
   console.log("\n=== Deployment Summary ===");
   console.log("VeritasToken:", tokenAddress);
@@ -195,6 +203,7 @@ async function main() {
   console.log("ArticleRegistry:", articleRegistryAddress);
   console.log("ReputationContract:", reputationContractAddress);
   console.log("VeritasFaucet:", faucetAddress);
+  console.log("JournalistRegistry:", journalistRegistryAddress);
   console.log("\n=== Configuration ===");
   console.log("Initial Supply:", ethers.formatEther(INITIAL_SUPPLY), "VERITAS");
   console.log("Voting Delay:", VOTING_DELAY.toString(), "blocks");
@@ -225,6 +234,7 @@ async function main() {
       ArticleRegistry: articleRegistryAddress,
       ReputationContract: reputationContractAddress,
       VeritasFaucet: faucetAddress,
+      JournalistRegistry: journalistRegistryAddress,
     },
     config: {
       initialSupply: ethers.formatEther(INITIAL_SUPPLY),

@@ -70,7 +70,7 @@ function ReportDetail({ reportId, onBack, sourceSection = 'reports' }) {
         })
 
         if (!proposal) {
-          setError('Report not found')
+          setError(`Proposal with ID ${proposalId} not found. It may not exist or hasn't been created yet.`)
           setLoading(false)
           return
         }
@@ -150,7 +150,7 @@ function ReportDetail({ reportId, onBack, sourceSection = 'reports' }) {
           }
 
           if (!selectedUpdate) {
-            setError('Article content not found')
+            setError('Article content not found. The article may not have been published yet or the content is not available.')
             setLoading(false)
             return
           }
@@ -205,6 +205,9 @@ function ReportDetail({ reportId, onBack, sourceSection = 'reports' }) {
           return
         }
 
+        // Normalize proposal ID for localStorage access
+        const normalizedProposalId = proposal.id?.toString() || String(proposal.id)
+        
         // For Reports page: Check if proposal is executed/succeeded OR user has donated
         if (sourceSection === 'reports') {
           const donations = JSON.parse(localStorage.getItem('veritasDonations') || '[]')
@@ -277,6 +280,18 @@ function ReportDetail({ reportId, onBack, sourceSection = 'reports' }) {
           content = description.substring(descriptionStart + 12).trim()
         }
 
+        // If no content from description, try to get from articleContent or news updates
+        if ((!content || content.length < 50) && updates.articleContent) {
+          content = updates.articleContent
+        } else if ((!content || content.length < 50) && updates.news.length > 0) {
+          // Use the latest news update content
+          const latestNews = updates.news[0]
+          content = latestNews.content || content
+          if (latestNews.title && !title.includes('Proposal')) {
+            title = latestNews.title
+          }
+        }
+
         // Format content as HTML
         const formattedContent = content
           .split('\n')
@@ -291,13 +306,13 @@ function ReportDetail({ reportId, onBack, sourceSection = 'reports' }) {
           title: title,
           author: author,
           category: category,
-          content: formattedContent || `<p>${content}</p>`,
+          content: formattedContent || `<p>${content || 'No content available.'}</p>`,
           publishedDate: new Date().toLocaleDateString('en-US', { 
             year: 'numeric', 
             month: 'long', 
             day: 'numeric' 
           }),
-          readTime: '5 min read',
+          readTime: `${Math.ceil((content || '').length / 500)} min read`,
           ipfsHash: null, // Will be added when IPFS integration is complete
           proposer: proposal.proposer,
           votesFor: proposal.votesFor,
@@ -306,7 +321,14 @@ function ReportDetail({ reportId, onBack, sourceSection = 'reports' }) {
         })
       } catch (error) {
         console.error('Error fetching report:', error)
-        setError('Failed to load report. Please check your connection.')
+        const errorMessage = error.message || 'Failed to load report'
+        if (errorMessage.includes('network') || errorMessage.includes('connection')) {
+          setError('Failed to load report. Please check your network connection and try again.')
+        } else if (errorMessage.includes('contract')) {
+          setError('Failed to load report. Please check that you are connected to the correct network (Sepolia testnet).')
+        } else {
+          setError(`Failed to load report: ${errorMessage}. Please try again or contact support if the problem persists.`)
+        }
       } finally {
         setLoading(false)
       }
@@ -352,7 +374,7 @@ function ReportDetail({ reportId, onBack, sourceSection = 'reports' }) {
             <p>
               {sourceSection === 'read' 
                 ? 'Articles are published by investigators as their investigations progress. Check back later for updates.'
-                : 'Reports are stored on IPFS and will be available once proposals are executed and reports are published.'}
+                : 'Reports are available once proposals are executed or if you have donated to the proposal. Make sure the proposal exists and has been published.'}
             </p>
           </div>
         </div>

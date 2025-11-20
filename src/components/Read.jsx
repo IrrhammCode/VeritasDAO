@@ -109,12 +109,8 @@ function Read({ onArticleClick }) {
               })
             }
 
-            // Debug logging
-            console.log(`Proposal ${proposalId}: readVisibility=${readVisibility}, settings=`, proposalSettings)
-
             // Skip if visibility is 'none' or not set
             if (!readVisibility || readVisibility === 'none') {
-              console.log(`Skipping proposal ${proposalId}: no read visibility set`)
               continue
             }
 
@@ -142,7 +138,6 @@ function Read({ onArticleClick }) {
             )
             let newsUpdates = proposalUpdates.news || []
 
-            console.log(`Proposal ${proposalId}: newsUpdates.length=${newsUpdates.length}, updates=`, proposalUpdates)
 
             // If no news updates but visibility is set, try to create article from articleContent
             if (newsUpdates.length === 0 && readVisibility) {
@@ -158,7 +153,6 @@ function Read({ onArticleClick }) {
               if (!content || content.length < 50) {
                 // Try to get from proposal settings or check if it was saved during submit
                 const savedContent = proposalSettings.articleContent || proposalUpdates.articleContent
-                console.log(`Proposal ${proposalId}: savedContent length=`, savedContent?.length)
                 if (savedContent && savedContent.length >= 50) {
                   content = savedContent
                 }
@@ -174,20 +168,15 @@ function Read({ onArticleClick }) {
                   proposer: proposal.proposer
                 }
                 newsUpdates = [defaultUpdate] // Use array directly
-                console.log(`Proposal ${proposalId}: Created default update from content`)
               } else {
                 // If still no content, skip this proposal
-                console.log(`Proposal ${proposalId}: No content found, skipping. Content length:`, content?.length)
                 continue
               }
             }
 
             if (newsUpdates.length === 0) {
-              console.log(`Proposal ${proposalId}: No news updates, skipping`)
               continue // Skip proposals without content
             }
-            
-            console.log(`Proposal ${proposalId}: Processing ${newsUpdates.length} news updates`)
 
             // Check user access
             const access = account ? await checkUserAccess(proposal, account) : { hasAccess: false, isDonator: false, isVoter: false, votedFor: false }

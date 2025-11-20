@@ -1,0 +1,77 @@
+.app {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  /* 3D Newspaper Container Effect */
+  background: var(--bg-primary);
+  /* Add subtle paper texture overlay */
+  background-image: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(0, 0, 0, 0.01) 10px,
+      rgba(0, 0, 0, 0.01) 20px
+    );
+}
+
+/* 3D Newspaper Page Effect - Print Dots & Creases */
+.app::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    /* Newspaper print dots pattern */
+    radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.12) 1px, transparent 0),
+    /* Paper crease effect - center vertical */
+    linear-gradient(
+      to right,
+      transparent calc(50% - 3px),
+      rgba(0, 0, 0, 0.08) calc(50% - 2px),
+      rgba(0, 0, 0, 0.12) 50%,
+      rgba(0, 0, 0, 0.08) calc(50% + 2px),
+      transparent calc(50% + 3px)
+    ),
+    /* Paper crease effect - horizontal */
+    linear-gradient(
+      to bottom,
+      transparent calc(30% - 3px),
+      rgba(0, 0, 0, 0.06) calc(30% - 2px),
+      rgba(0, 0, 0, 0.1) 30%,
+      rgba(0, 0, 0, 0.06) calc(30% + 2px),
+      transparent calc(30% + 3px)
+    );
+  background-size: 20px 20px, 100% 100%, 100% 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+}
+
+.main-content {
+  position: relative;
+  z-index: 1;
+  min-height: calc(100vh - 80px);
+  /* Ensure content is above background layers */
+  background: transparent;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+

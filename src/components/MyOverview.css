@@ -1,0 +1,336 @@
+.my-overview {
+  margin-bottom: 0;
+}
+
+.section-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2rem;
+  letter-spacing: -0.02em;
+}
+
+.overview-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .overview-cards {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+.overview-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 2rem;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+  box-shadow: var(--shadow-newspaper);
+  position: relative;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  backdrop-filter: blur(10px);
+  /* Vintage Newspaper 3D Effect */
+  background-image: 
+    /* Paper fold highlight */
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 30%, transparent 70%),
+    /* Paper shadow */
+    linear-gradient(to top, rgba(0, 0, 0, 0.08) 0%, transparent 40%),
+    /* Aged paper texture */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(0, 0, 0, 0.02) 1px,
+      rgba(0, 0, 0, 0.02) 2px
+    ),
+    /* Base vintage color */
+    linear-gradient(135deg, var(--bg-paper-yellow) 0%, var(--bg-secondary) 100%);
+  background-size: 100% 100%, 100% 100%, 100% 4px, 100% 100%;
+}
+
+/* 3D Newspaper Fold Effect - Top Right Corner */
+.overview-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(0, 0, 0, 0.1) 50%,
+    transparent 100%
+  );
+  border-radius: 0 8px 0 40px;
+  pointer-events: none;
+  z-index: 1;
+  box-shadow: 
+    -2px 2px 4px rgba(0, 0, 0, 0.2),
+    inset -1px 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+/* 3D Newspaper Fold Effect - Bottom Left Corner */
+.overview-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(
+    315deg,
+    rgba(0, 0, 0, 0.15) 0%,
+    rgba(0, 0, 0, 0.05) 50%,
+    transparent 100%
+  );
+  border-radius: 0 0 0 8px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.overview-card:hover {
+  border-color: var(--accent-blue);
+  box-shadow: var(--shadow-newspaper-hover);
+  transform: translateY(-8px) rotateX(2deg) rotateY(-1deg) scale(1.02);
+}
+
+.overview-card:hover::before {
+  width: 50px;
+  height: 50px;
+  box-shadow: 
+    -3px 3px 6px rgba(0, 0, 0, 0.3),
+    inset -2px 2px 3px rgba(255, 255, 255, 0.6);
+}
+
+.card-header {
+  margin-bottom: 1.5rem;
+}
+
+.card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.card-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  font-family: 'Inter', 'Manrope', sans-serif;
+}
+
+.card-label {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.card-note {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.delegate-button {
+  padding: 0.75rem 1.5rem;
+  background: var(--accent-blue);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+  box-shadow: var(--shadow-emboss);
+  position: relative;
+  overflow: hidden;
+}
+
+.delegate-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), transparent);
+  pointer-events: none;
+}
+
+.delegate-button:hover {
+  box-shadow: var(--shadow-pressed);
+  transform: translateY(1px);
+}
+
+.delegate-button:active {
+  box-shadow: var(--shadow-pressed);
+  transform: translateY(2px);
+}
+
+.activity-text {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0.5rem 0;
+}
+
+.loading-skeleton {
+  height: 2.5rem;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.error-message {
+  padding: 1rem;
+  background: var(--bg-error);
+  border: 1px solid var(--border-error);
+  border-radius: 8px;
+  color: var(--color-error);
+  font-size: 0.875rem;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.card-info-message {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  border-left: 4px solid var(--accent-blue);
+  text-align: center;
+}
+
+.card-info-message .info-icon {
+  font-size: 2rem;
+  margin: 0 0 0.5rem 0;
+  line-height: 1;
+}
+
+.card-info-message p {
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.card-info-message p strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.info-hint {
+  font-size: 0.8rem !important;
+  color: var(--text-secondary) !important;
+  font-style: italic;
+  margin-top: 0.5rem !important;
+}
+
+.delegate-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.faucet-button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-emboss);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.faucet-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), transparent);
+  pointer-events: none;
+}
+
+.faucet-button:hover:not(:disabled) {
+  box-shadow: var(--shadow-pressed);
+  transform: translateY(1px);
+}
+
+.faucet-button:active:not(:disabled) {
+  box-shadow: var(--shadow-pressed);
+  transform: translateY(2px);
+}
+
+.faucet-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.faucet-button .button-icon {
+  font-size: 1.2rem;
+}
+
+.faucet-button .button-spinner {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (max-width: 768px) {
+  .overview-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .card-value {
+    font-size: 2rem;
+  }
+}
+

@@ -1,0 +1,374 @@
+.reports-section {
+  padding: 12rem 0 2rem 0;
+  min-height: calc(100vh - 80px);
+}
+
+.archive-badge {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  max-width: 600px;
+  margin: 0 auto 3rem;
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: var(--shadow-newspaper);
+  position: relative;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  /* Vintage Newspaper 3D Effect */
+  background-image: 
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 30%, transparent 70%),
+    linear-gradient(to top, rgba(0, 0, 0, 0.08) 0%, transparent 40%),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(0, 0, 0, 0.02) 1px,
+      rgba(0, 0, 0, 0.02) 2px
+    ),
+    linear-gradient(135deg, var(--bg-paper-yellow) 0%, var(--bg-secondary) 100%);
+  background-size: 100% 100%, 100% 100%, 100% 4px, 100% 100%;
+}
+
+/* 3D Newspaper Fold Effect - Top Right Corner */
+.archive-badge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(0, 0, 0, 0.1) 50%,
+    transparent 100%
+  );
+  border-radius: 0 8px 0 40px;
+  pointer-events: none;
+  z-index: 1;
+  box-shadow: 
+    -2px 2px 4px rgba(0, 0, 0, 0.2),
+    inset -1px 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+/* 3D Newspaper Fold Effect - Bottom Left Corner */
+.archive-badge::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(
+    315deg,
+    rgba(0, 0, 0, 0.15) 0%,
+    rgba(0, 0, 0, 0.05) 50%,
+    transparent 100%
+  );
+  border-radius: 0 0 0 8px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.badge-icon {
+  font-size: 2.5rem;
+}
+
+.badge-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.badge-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.reports-filter {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.reports-filter .filter-button {
+  padding: 0.75rem 1.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.reports-filter .filter-button:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.reports-filter .filter-button.active {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-green));
+  color: var(--bg-primary);
+  border-color: transparent;
+}
+
+.loading-state,
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-secondary);
+}
+
+.empty-state {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.empty-state p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.reports-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+.report-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 2rem;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-newspaper);
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  /* Vintage Newspaper 3D Effect */
+  background-image: 
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 30%, transparent 70%),
+    linear-gradient(to top, rgba(0, 0, 0, 0.08) 0%, transparent 40%),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(0, 0, 0, 0.02) 1px,
+      rgba(0, 0, 0, 0.02) 2px
+    ),
+    linear-gradient(135deg, var(--bg-paper-yellow) 0%, var(--bg-secondary) 100%);
+  background-size: 100% 100%, 100% 100%, 100% 4px, 100% 100%;
+}
+
+/* 3D Newspaper Fold Effect - Top Right Corner */
+.report-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(0, 0, 0, 0.1) 50%,
+    transparent 100%
+  );
+  border-radius: 0 8px 0 40px;
+  pointer-events: none;
+  z-index: 1;
+  box-shadow: 
+    -2px 2px 4px rgba(0, 0, 0, 0.2),
+    inset -1px 1px 2px rgba(255, 255, 255, 0.5);
+  transition: all 0.4s ease;
+}
+
+/* 3D Newspaper Fold Effect - Bottom Left Corner */
+.report-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(
+    315deg,
+    rgba(0, 0, 0, 0.15) 0%,
+    rgba(0, 0, 0, 0.05) 50%,
+    transparent 100%
+  );
+  border-radius: 0 0 0 8px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.report-card:hover {
+  box-shadow: var(--shadow-newspaper-hover);
+  transform: translateY(-8px) rotateX(2deg) rotateY(-1deg) scale(1.02);
+}
+
+.report-card:hover::before {
+  width: 50px;
+  height: 50px;
+  box-shadow: 
+    -3px 3px 6px rgba(0, 0, 0, 0.3),
+    inset -2px 2px 3px rgba(255, 255, 255, 0.6);
+}
+
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.report-category {
+  padding: 0.25rem 0.75rem;
+  background: var(--bg-purple);
+  color: var(--accent-purple);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.report-status-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.report-donated-badge {
+  padding: 0.3rem 0.75rem;
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+  color: white;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.report-status {
+  padding: 0.25rem 0.75rem;
+  background: var(--bg-success-hover);
+  color: var(--accent-green);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.report-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+
+.report-meta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.report-author {
+  color: var(--accent-blue);
+  font-weight: 500;
+}
+
+.report-excerpt {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  flex: 1;
+  font-size: 0.95rem;
+}
+
+.report-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.read-time {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.read-button {
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+  color: var(--text-primary);
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.875rem;
+}
+
+.read-button:hover {
+  box-shadow: 0 0 20px var(--glow-purple);
+}
+
+.report-ipfs-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-family: 'Courier New', monospace;
+}
+
+.ipfs-icon {
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .reports-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .archive-badge {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+

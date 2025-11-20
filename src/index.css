@@ -1,0 +1,398 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* Vintage Newspaper 3D Color Palette */
+  
+  /* Background Colors - Old Vintage Paper */
+  --bg-primary: #E8E0D0;
+  --bg-secondary: #D4C5A9;
+  --bg-tertiary: #C4B59A;
+  --bg-paper-shadow: #B8A98F;
+  --bg-paper-yellow: #F5E6D3;
+  --bg-paper-aged: #E5D4B8;
+  --bg-overlay: rgba(232, 224, 208, 0.95);
+  --bg-overlay-light: rgba(232, 224, 208, 0.8);
+  
+  /* Accent Colors */
+  --accent-primary: #2A6F97;
+  --accent-secondary: #2A6F97;
+  --accent-green: #2A6F97;
+  --accent-blue: #2A6F97;
+  --accent-purple: #2A6F97;
+  --accent-red: #D62828;
+  
+  /* Status Colors */
+  --color-success: #2A6F97;
+  --color-error: #D62828;
+  --color-error-dark: #B01E1E;
+  --color-warning: #D62828;
+  --color-info: #2A6F97;
+  --color-muted: #4A4A4A;
+  
+  /* Text Colors - Ink */
+  --text-primary: #1A1A1A;
+  --text-secondary: #4A4A4A;
+  --text-muted: #6A6A6A;
+  
+  /* Border Colors */
+  --border-color: rgba(30, 30, 30, 0.2);
+  --border-light: rgba(30, 30, 30, 0.1);
+  
+  /* 3D Shadow Effects - Vintage Newspaper */
+  --shadow-dark: rgba(0, 0, 0, 0.25);
+  --shadow-medium: rgba(0, 0, 0, 0.15);
+  --shadow-light: rgba(255, 255, 255, 0.7);
+  --shadow-paper: rgba(184, 169, 143, 0.5);
+  --shadow-emboss: 
+    0 2px 4px var(--shadow-dark),
+    inset 0 1px 2px var(--shadow-light),
+    0 1px 0 rgba(255, 255, 255, 0.5);
+  --shadow-pressed: 
+    inset 0 3px 6px var(--shadow-dark),
+    inset 0 -1px 2px var(--shadow-light);
+  --shadow-card: 
+    0 6px 12px var(--shadow-dark),
+    0 3px 6px var(--shadow-medium),
+    0 1px 2px var(--shadow-paper),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --shadow-deep: 
+    0 10px 20px var(--shadow-dark),
+    0 5px 10px var(--shadow-medium),
+    0 2px 4px var(--shadow-paper),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  --shadow-newspaper: 
+    0 8px 16px rgba(0, 0, 0, 0.3),
+    0 4px 8px rgba(0, 0, 0, 0.25),
+    0 2px 4px rgba(0, 0, 0, 0.2),
+    inset 0 2px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.15),
+    inset 0 0 20px rgba(184, 169, 143, 0.1);
+  --shadow-newspaper-hover: 
+    0 12px 24px rgba(0, 0, 0, 0.35),
+    0 6px 12px rgba(0, 0, 0, 0.3),
+    0 3px 6px rgba(0, 0, 0, 0.25),
+    inset 0 2px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.2),
+    inset 0 0 30px rgba(184, 169, 143, 0.15);
+  
+  /* Glow Effects - Subtle for newspaper style */
+  --glow-primary: rgba(42, 111, 151, 0.2);
+  --glow-secondary: rgba(42, 111, 151, 0.2);
+  --glow-green: rgba(42, 111, 151, 0.2);
+  --glow-blue: rgba(42, 111, 151, 0.2);
+  --glow-purple: rgba(42, 111, 151, 0.2);
+  --glow-success: rgba(42, 111, 151, 0.2);
+  --glow-error: rgba(214, 40, 40, 0.2);
+  --glow-warning: rgba(214, 40, 40, 0.2);
+  
+  /* Background Variants for Status */
+  --bg-success: rgba(42, 111, 151, 0.1);
+  --bg-success-hover: rgba(42, 111, 151, 0.15);
+  --bg-error: rgba(214, 40, 40, 0.1);
+  --bg-error-hover: rgba(214, 40, 40, 0.15);
+  --bg-warning: rgba(214, 40, 40, 0.1);
+  --bg-warning-hover: rgba(214, 40, 40, 0.15);
+  --bg-info: rgba(42, 111, 151, 0.1);
+  --bg-info-hover: rgba(42, 111, 151, 0.15);
+  --bg-purple: rgba(42, 111, 151, 0.1);
+  --bg-muted: rgba(74, 74, 74, 0.1);
+  --bg-install: rgba(214, 40, 40, 0.1);
+  --bg-install-hover: rgba(214, 40, 40, 0.15);
+  --color-install: #D62828;
+  --border-install: rgba(214, 40, 40, 0.3);
+  
+  /* Overlay colors */
+  --overlay-dark: rgba(0, 0, 0, 0.4);
+  --overlay-light: rgba(255, 255, 255, 0.3);
+  --overlay-white: rgba(255, 255, 255, 0.5);
+  
+  /* Border Variants for Status */
+  --border-success: rgba(42, 111, 151, 0.3);
+  --border-error: rgba(214, 40, 40, 0.3);
+  --border-warning: rgba(214, 40, 40, 0.3);
+  --border-info: rgba(42, 111, 151, 0.3);
+  --border-muted: rgba(74, 74, 74, 0.2);
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg-primary);
+  /* Vintage Newspaper 3D Texture */
+  background-image: 
+    /* Paper texture lines */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(0, 0, 0, 0.03) 1px,
+      rgba(0, 0, 0, 0.03) 2px
+    ),
+    /* Aged yellowing effect */
+    radial-gradient(
+      circle at 20% 50%,
+      rgba(245, 230, 211, 0.3) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(229, 212, 184, 0.2) 0%,
+      transparent 50%
+    ),
+    /* Paper grain texture */
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.01) 2px,
+      rgba(0, 0, 0, 0.01) 4px
+    ),
+    /* Base vintage color */
+    linear-gradient(
+      135deg,
+      var(--bg-paper-yellow) 0%,
+      var(--bg-paper-aged) 50%,
+      var(--bg-primary) 100%
+    );
+  background-size: 100% 4px, 100% 100%, 100% 100%, 4px 100%, 100% 100%;
+  color: var(--text-primary);
+  overflow-x: hidden;
+  font-weight: 400;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* 3D Newspaper Background Layers */
+body {
+  position: relative;
+}
+
+/* Print dots pattern + Top fold highlight */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    /* Newspaper print dots pattern */
+    radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.12) 1px, transparent 0),
+    /* Top fold highlight */
+    linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.15) 0%,
+      rgba(255, 255, 255, 0.05) 30%,
+      transparent 200px
+    );
+  background-size: 20px 20px, 100% 100%;
+  pointer-events: none;
+  opacity: 0.4;
+  z-index: 0;
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.1),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+/* 3D Newspaper Shadow Layers */
+html {
+  position: relative;
+}
+
+html::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    /* Left shadow - newspaper edge with depth */
+    linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.12) 0%,
+      rgba(0, 0, 0, 0.08) 30px,
+      rgba(0, 0, 0, 0.04) 80px,
+      rgba(0, 0, 0, 0.02) 150px,
+      transparent 250px
+    ),
+    /* Right shadow - newspaper edge with depth */
+    linear-gradient(
+      to left,
+      rgba(0, 0, 0, 0.12) 0%,
+      rgba(0, 0, 0, 0.08) 30px,
+      rgba(0, 0, 0, 0.04) 80px,
+      rgba(0, 0, 0, 0.02) 150px,
+      transparent 250px
+    ),
+    /* Top shadow - newspaper fold with depth */
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.15) 0%,
+      rgba(0, 0, 0, 0.1) 50px,
+      rgba(0, 0, 0, 0.06) 150px,
+      rgba(0, 0, 0, 0.03) 250px,
+      transparent 400px
+    ),
+    /* Bottom shadow - newspaper edge with depth */
+    linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.12) 0%,
+      rgba(0, 0, 0, 0.08) 50px,
+      rgba(0, 0, 0, 0.04) 120px,
+      rgba(0, 0, 0, 0.02) 200px,
+      transparent 300px
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 3D Newspaper Fold Lines */
+html::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    /* Vertical fold line - left side */
+    linear-gradient(
+      to right,
+      transparent 0%,
+      transparent calc(20% - 2px),
+      rgba(0, 0, 0, 0.15) calc(20% - 1px),
+      rgba(0, 0, 0, 0.2) 20%,
+      rgba(0, 0, 0, 0.15) calc(20% + 1px),
+      transparent calc(20% + 2px),
+      transparent 100%
+    ),
+    /* Vertical fold line - right side */
+    linear-gradient(
+      to left,
+      transparent 0%,
+      transparent calc(20% - 2px),
+      rgba(0, 0, 0, 0.15) calc(20% - 1px),
+      rgba(0, 0, 0, 0.2) 20%,
+      rgba(0, 0, 0, 0.15) calc(20% + 1px),
+      transparent calc(20% + 2px),
+      transparent 100%
+    ),
+    /* Horizontal fold line - top */
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      transparent calc(15% - 2px),
+      rgba(0, 0, 0, 0.12) calc(15% - 1px),
+      rgba(0, 0, 0, 0.18) 15%,
+      rgba(0, 0, 0, 0.12) calc(15% + 1px),
+      transparent calc(15% + 2px),
+      transparent 100%
+    );
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+/* Newspaper Background Text - Journalism Articles Layer 1 */
+body::after {
+  content: 'JOURNALISM TRUTH FREEDOM VERITAS NEWS INVESTIGATION REPORTING CENSORSHIP-RESISTANT DECENTRALIZED BLOCKCHAIN DAO DEMOCRACY TRANSPARENCY ACCOUNTABILITY FACT-CHECKING SOURCES EVIDENCE EXPOSÉ WHISTLEBLOWER PUBLIC INTEREST FOURTH ESTATE PRESS FREEDOM JOURNALISM TRUTH FREEDOM VERITAS NEWS INVESTIGATION REPORTING CENSORSHIP-RESISTANT DECENTRALIZED BLOCKCHAIN DAO DEMOCRACY TRANSPARENCY ACCOUNTABILITY FACT-CHECKING SOURCES EVIDENCE EXPOSÉ WHISTLEBLOWER PUBLIC INTEREST FOURTH ESTATE PRESS FREEDOM JOURNALISM TRUTH FREEDOM VERITAS NEWS INVESTIGATION REPORTING CENSORSHIP-RESISTANT DECENTRALIZED BLOCKCHAIN DAO DEMOCRACY TRANSPARENCY ACCOUNTABILITY FACT-CHECKING SOURCES EVIDENCE EXPOSÉ WHISTLEBLOWER PUBLIC INTEREST FOURTH ESTATE PRESS FREEDOM JOURNALISM TRUTH FREEDOM VERITAS NEWS INVESTIGATION REPORTING CENSORSHIP-RESISTANT DECENTRALIZED BLOCKCHAIN DAO DEMOCRACY TRANSPARENCY ACCOUNTABILITY FACT-CHECKING SOURCES EVIDENCE EXPOSÉ WHISTLEBLOWER PUBLIC INTEREST FOURTH ESTATE PRESS FREEDOM';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  font-family: 'Times New Roman', 'Georgia', serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(26, 26, 26, 0.1);
+  line-height: 1.6;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: pre-wrap;
+  word-spacing: 0.5em;
+  pointer-events: none;
+  z-index: 0;
+  padding: 3rem 2rem;
+  opacity: 0.5;
+  transform: rotate(-1.5deg);
+  transform-origin: top left;
+  overflow: hidden;
+  text-shadow: 
+    0 1px 0 rgba(255, 255, 255, 0.4),
+    0 -1px 0 rgba(0, 0, 0, 0.15);
+  /* Newspaper column effect */
+  column-count: 4;
+  column-gap: 2.5rem;
+  column-rule: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Newspaper Background Text - Journalism Articles Layer 2 */
+.app::after {
+  content: 'BREAKING NEWS EXCLUSIVE INVESTIGATION SOURCES REVEAL DOCUMENTS SHOW EVIDENCE SUGGESTS PUBLIC RECORDS TRANSPARENCY REPORT FACT CHECK VERIFIED CONFIRMED OFFICIAL STATEMENT RESPONSE REACTION ANALYSIS COMMENTARY EDITORIAL OPINION PERSPECTIVE INSIGHT BREAKING NEWS EXCLUSIVE INVESTIGATION SOURCES REVEAL DOCUMENTS SHOW EVIDENCE SUGGESTS PUBLIC RECORDS TRANSPARENCY REPORT FACT CHECK VERIFIED CONFIRMED OFFICIAL STATEMENT RESPONSE REACTION ANALYSIS COMMENTARY EDITORIAL OPINION PERSPECTIVE INSIGHT BREAKING NEWS EXCLUSIVE INVESTIGATION SOURCES REVEAL DOCUMENTS SHOW EVIDENCE SUGGESTS PUBLIC RECORDS TRANSPARENCY REPORT FACT CHECK VERIFIED CONFIRMED OFFICIAL STATEMENT RESPONSE REACTION ANALYSIS COMMENTARY EDITORIAL OPINION PERSPECTIVE INSIGHT';
+  position: fixed;
+  top: 8%;
+  left: 3%;
+  width: 94%;
+  height: 85%;
+  font-family: 'Times New Roman', 'Georgia', serif;
+  font-size: 10px;
+  font-weight: 300;
+  color: rgba(26, 26, 26, 0.08);
+  line-height: 1.8;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: pre-wrap;
+  word-spacing: 0.6em;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+  transform: rotate(1deg);
+  transform-origin: top left;
+  overflow: hidden;
+  column-count: 3;
+  column-gap: 3rem;
+  column-rule: 1px solid rgba(0, 0, 0, 0.05);
+  text-shadow: 
+    0 1px 0 rgba(255, 255, 255, 0.3),
+    0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent-blue);
+  border-radius: 5px;
+  box-shadow: var(--shadow-emboss);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-red);
+}
+

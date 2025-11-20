@@ -1,0 +1,42 @@
+{
+  "name": "veritasdao",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Decentralized journalism platform frontend - 100% censorship-resistant",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "compile": "hardhat compile",
+    "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia",
+    "deploy:pinme": "node scripts/deploy-pinme.js",
+    "test": "hardhat test",
+    "verify:env": "node scripts/verify-env.js",
+    "sync:env": "node scripts/sync-env.js",
+    "gen:frontend-env": "node scripts/generate-frontend-env.js",
+    "add:frontend-env": "node scripts/add-frontend-env.js"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.88.13",
+    "@react-three/fiber": "^8.15.11",
+    "@tanstack/react-query": "^5.90.9",
+    "ethers": "^6.15.0",
+    "framer-motion": "^10.16.16",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "three": "^0.158.0",
+    "viem": "^2.39.0",
+    "wagmi": "^2.19.4"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/contracts": "^5.0.2",
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.2.1",
+    "dotenv": "^16.3.1",
+    "hardhat": "^2.19.4",
+    "vite": "^5.0.8"
+  }
+}

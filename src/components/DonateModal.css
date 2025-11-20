@@ -1,0 +1,318 @@
+.donate-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+}
+
+.donate-modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 2.5rem;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  /* Vintage Newspaper 3D Effect */
+  background-image: 
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 30%, transparent 70%),
+    linear-gradient(to top, rgba(0, 0, 0, 0.08) 0%, transparent 40%),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(0, 0, 0, 0.02) 1px,
+      rgba(0, 0, 0, 0.02) 2px
+    ),
+    linear-gradient(135deg, var(--bg-paper-yellow) 0%, var(--bg-secondary) 100%);
+  background-size: 100% 100%, 100% 100%, 100% 4px, 100% 100%;
+}
+
+.donate-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  font-size: 2rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.donate-modal-close:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  transform: rotate(90deg);
+}
+
+.donate-modal-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.donate-modal-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.donate-modal-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.donate-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.proposal-info {
+  padding: 1.5rem;
+  background: var(--bg-tertiary);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.proposal-title-small {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.recipient-address {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+  font-family: 'Courier New', monospace;
+}
+
+.donation-network-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.network-badge {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent-blue);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.balance-info {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.balance-info strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.proposal-author-small {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-family: 'Courier New', monospace;
+}
+
+.donation-amount-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.donation-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.preset-amounts {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.75rem;
+}
+
+.preset-amount-btn {
+  padding: 0.75rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.preset-amount-btn:hover {
+  background: var(--bg-secondary);
+  border-color: var(--accent-blue);
+}
+
+.preset-amount-btn.active {
+  background: var(--accent-blue);
+  color: #FFFFFF;
+  border-color: var(--accent-blue);
+}
+
+.donation-input {
+  padding: 1rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.donation-input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.early-access-section {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+  border: 1px solid var(--accent-blue);
+  border-radius: 12px;
+}
+
+.early-access-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  cursor: pointer;
+}
+
+.early-access-checkbox input[type="checkbox"] {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+.checkbox-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.checkbox-label strong {
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.checkbox-label small {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.donation-summary {
+  padding: 1.5rem;
+  background: var(--bg-tertiary);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.summary-row.highlight {
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+.donate-button {
+  padding: 1.25rem;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  color: #FFFFFF;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.donate-button:hover:not(:disabled) {
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+  transform: translateY(-2px);
+}
+
+.donate-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.donation-note {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.6;
+  padding: 1rem;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  .donate-modal {
+    padding: 1.5rem;
+    max-width: 100%;
+  }
+
+  .preset-amounts {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+

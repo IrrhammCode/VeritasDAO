@@ -1,0 +1,436 @@
+.report-detail-section {
+  padding: 12rem 2rem 4rem 2rem;
+  min-height: calc(100vh - 80px);
+}
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 2rem;
+}
+
+.back-button:hover {
+  background: var(--bg-info);
+  border-color: var(--accent-blue);
+  box-shadow: var(--shadow-emboss);
+}
+
+.report-detail-content {
+  max-width: 900px;
+  margin: 0 auto;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 3rem;
+  box-shadow: var(--shadow-newspaper);
+  position: relative;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  /* Vintage Newspaper 3D Effect */
+  background-image: 
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 30%, transparent 70%),
+    linear-gradient(to top, rgba(0, 0, 0, 0.08) 0%, transparent 40%),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(0, 0, 0, 0.02) 1px,
+      rgba(0, 0, 0, 0.02) 2px
+    ),
+    linear-gradient(135deg, var(--bg-paper-yellow) 0%, var(--bg-secondary) 100%);
+  background-size: 100% 100%, 100% 100%, 100% 4px, 100% 100%;
+}
+
+/* 3D Newspaper Fold Effect - Top Right Corner */
+.report-detail-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(0, 0, 0, 0.1) 50%,
+    transparent 100%
+  );
+  border-radius: 0 8px 0 50px;
+  pointer-events: none;
+  z-index: 1;
+  box-shadow: 
+    -2px 2px 4px rgba(0, 0, 0, 0.2),
+    inset -1px 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+/* 3D Newspaper Fold Effect - Bottom Left Corner */
+.report-detail-content::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(
+    315deg,
+    rgba(0, 0, 0, 0.15) 0%,
+    rgba(0, 0, 0, 0.05) 50%,
+    transparent 100%
+  );
+  border-radius: 0 0 0 8px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.report-detail-header {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.report-category-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: var(--bg-purple);
+  color: var(--accent-purple);
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1.5rem;
+}
+
+.report-detail-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.report-detail-meta {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.report-author-name {
+  color: var(--accent-blue);
+  font-weight: 500;
+}
+
+.report-ipfs-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: var(--bg-info);
+  border: 1px solid var(--border-info);
+  border-radius: 12px;
+  margin-bottom: 3rem;
+}
+
+.ipfs-icon-large {
+  font-size: 2rem;
+}
+
+.ipfs-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.ipfs-hash {
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  color: var(--accent-blue);
+  font-weight: 600;
+}
+
+.report-body {
+  color: var(--text-primary);
+  line-height: 1.8;
+  font-size: 1.125rem;
+}
+
+.report-body h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.report-body h2:first-child {
+  margin-top: 0;
+}
+
+.report-body p {
+  margin-bottom: 1.5rem;
+  color: var(--text-secondary);
+}
+
+.report-body ul {
+  margin: 1.5rem 0;
+  padding-left: 2rem;
+}
+
+.report-body li {
+  margin-bottom: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.report-body em {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.report-body strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Update Sections */
+.update-section {
+  margin: 3rem 0;
+  padding: 2rem 0;
+  border-top: 1px solid var(--border-color);
+}
+
+.update-section:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.update-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+}
+
+.update-icon {
+  font-size: 1.5rem;
+}
+
+/* Status Update */
+.status-update-card {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border-left: 4px solid var(--accent-blue);
+}
+
+.status-update-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.status-badge-update {
+  padding: 0.4rem 0.75rem;
+  background: var(--accent-blue);
+  color: white;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-update-date {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.status-update-message {
+  color: var(--text-primary);
+  line-height: 1.8;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* News Updates */
+.news-updates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.news-update-card {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.news-update-card:hover {
+  border-color: var(--accent-blue);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+.news-update-header {
+  margin-bottom: 1rem;
+}
+
+.news-update-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.75rem 0;
+}
+
+.news-update-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.early-access-badge-small {
+  padding: 0.25rem 0.5rem;
+  background: var(--accent-purple);
+  color: white;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.news-update-date {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.news-update-content {
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.news-update-content p {
+  margin: 0.75rem 0;
+}
+
+.news-update-content p:first-child {
+  margin-top: 0;
+}
+
+.news-update-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Main Content Section */
+.main-content-section {
+  margin-top: 2rem;
+}
+
+.report-footer-info {
+  display: flex;
+  gap: 1rem;
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
+
+.footer-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: var(--bg-tertiary);
+  border-radius: 12px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  flex: 1;
+  min-width: 250px;
+}
+
+.footer-badge .badge-icon {
+  font-size: 1.25rem;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+}
+
+.loading-state p {
+  color: var(--text-secondary);
+}
+
+.error-message {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+}
+
+.error-message h2 {
+  font-size: 2rem;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.error-message p {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .report-detail-content {
+    padding: 2rem 1.5rem;
+  }
+
+  .report-detail-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .report-ipfs-info {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .report-footer-info {
+    flex-direction: column;
+  }
+
+  .footer-badge {
+    min-width: 100%;
+  }
+}
+

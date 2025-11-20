@@ -2,7 +2,7 @@
 
 > **Full-Stack Decentralized Platform** - Complete Smart Contract Implementation + Censorship-Resistant Frontend
 
-🌐 **Live Demo**: [https://jljniguy.pinit.eth.limo/](https://jljniguy.pinit.eth.limo/)
+🌐 **Live Demo**: 
 
 VeritasDAO is a **complete full-stack decentralized platform** for funding, publishing, and permanently archiving investigative journalism. Unlike frontend-only solutions, VeritasDAO implements a complete on-chain governance system with OpenZeppelin contracts, combined with a censorship-resistant frontend deployed via PinMe to IPFS and ENS.
 

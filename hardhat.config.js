@@ -72,7 +72,7 @@ export default {
       chainId: 1337,
     },
     sepolia: {
-      url: process.env.SEPOLIA_RPC_URL || "",
+      url: process.env.SEPOLIA_RPC_URL || "https://rpc.sepolia.org",
       accounts: getPrivateKey(),
       chainId: 11155111,
     },

@@ -182,9 +182,14 @@ function MyProposals() {
           <div className="my-proposals-grid">
             {proposals.map((proposal, index) => {
               const parsed = parseProposalDescription(proposal.description)
-              const totalVotes = parseFloat(proposal.votesFor) + parseFloat(proposal.votesAgainst)
+              const votesFor = parseFloat(proposal.votesFor || 0)
+              const votesAgainst = parseFloat(proposal.votesAgainst || 0)
+              const totalVotes = votesFor + votesAgainst
               const votesForPercent = totalVotes > 0 
-                ? (parseFloat(proposal.votesFor) / totalVotes) * 100 
+                ? (votesFor / totalVotes) * 100 
+                : 0
+              const votesAgainstPercent = totalVotes > 0 
+                ? (votesAgainst / totalVotes) * 100 
                 : 0
 
               // Load proposal updates from localStorage
@@ -305,38 +310,55 @@ function MyProposals() {
                   {/* Voting Progress */}
                   <div className="proposal-votes">
                     <div className="vote-progress-container">
-                      <div className="vote-bar">
-                        {votesForPercent > 0 && (
-                          <motion.div 
-                            className="vote-bar-fill vote-for-fill"
-                            initial={{ width: 0 }}
-                            animate={{ width: `${votesForPercent}%` }}
-                            transition={{ duration: 0.8, ease: "easeOut" }}
-                            style={{ left: '0%' }}
-                          />
-                        )}
-                        {(100 - votesForPercent) > 0 && (
-                          <motion.div 
-                            className="vote-bar-fill vote-against-fill"
-                            initial={{ width: 0 }}
-                            animate={{ width: `${100 - votesForPercent}%` }}
-                            transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-                            style={{ left: `${votesForPercent}%` }}
-                          />
-                        )}
-                      </div>
-                      <div className="vote-stats">
-                        <div className="vote-stat-item">
-                          <span className="vote-icon vote-icon-for">✓</span>
-                          <span className="votes-for">{parseFloat(proposal.votesFor).toFixed(2)} VERITAS</span>
-                          <span className="vote-percent">{votesForPercent.toFixed(1)}%</span>
+                      {totalVotes > 0 ? (
+                        <>
+                          <div className="vote-bar">
+                            {votesForPercent > 0 && (
+                              <motion.div 
+                                className="vote-bar-fill vote-for-fill"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${votesForPercent}%` }}
+                                transition={{ duration: 0.8, ease: "easeOut" }}
+                                style={{ left: '0%' }}
+                              />
+                            )}
+                            {votesAgainstPercent > 0 && (
+                              <motion.div 
+                                className="vote-bar-fill vote-against-fill"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${votesAgainstPercent}%` }}
+                                transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+                                style={{ left: `${votesForPercent}%` }}
+                              />
+                            )}
+                          </div>
+                          <div className="vote-stats">
+                            <div className="vote-stat-item">
+                              <span className="vote-icon vote-icon-for">✓</span>
+                              <span className="votes-for">{votesFor.toFixed(2)} VERITAS</span>
+                              <span className="vote-percent">{votesForPercent.toFixed(1)}%</span>
+                            </div>
+                            <div className="vote-stat-item">
+                              <span className="vote-icon vote-icon-against">✗</span>
+                              <span className="votes-against">{votesAgainst.toFixed(2)} VERITAS</span>
+                              <span className="vote-percent">{votesAgainstPercent.toFixed(1)}%</span>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="vote-stats">
+                          <div className="vote-stat-item">
+                            <span className="vote-icon vote-icon-for">✓</span>
+                            <span className="votes-for">0.00 VERITAS</span>
+                            <span className="vote-percent">-</span>
+                          </div>
+                          <div className="vote-stat-item">
+                            <span className="vote-icon vote-icon-against">✗</span>
+                            <span className="votes-against">0.00 VERITAS</span>
+                            <span className="vote-percent">-</span>
+                          </div>
                         </div>
-                        <div className="vote-stat-item">
-                          <span className="vote-icon vote-icon-against">✗</span>
-                          <span className="votes-against">{parseFloat(proposal.votesAgainst).toFixed(2)} VERITAS</span>
-                          <span className="vote-percent">{(100 - votesForPercent).toFixed(1)}%</span>
-                        </div>
-                      </div>
+                      )}
                     </div>
                   </div>
 

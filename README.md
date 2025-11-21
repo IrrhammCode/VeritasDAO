@@ -4,6 +4,8 @@
 
 🌐 **Live Demo**: [https://c4vqb6iq.pinit.eth.limo](https://c4vqb6iq.pinit.eth.limo)
 
+📹 **Video Demo**: [Watch on YouTube](https://youtu.be/nTFYY4_7Yfc?si=DIF5weZq4Su3TUdn)
+
 VeritasDAO is a **complete full-stack decentralized platform** for funding, publishing, and permanently archiving investigative journalism. Unlike frontend-only solutions, VeritasDAO implements a complete on-chain governance system with OpenZeppelin contracts, combined with a censorship-resistant frontend deployed via PinMe to IPFS and ENS.
 
 ## 🎯 Mission

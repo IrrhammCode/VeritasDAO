@@ -2,7 +2,7 @@
 
 > **Full-Stack Decentralized Platform** - Complete Smart Contract Implementation + Censorship-Resistant Frontend
 
-🌐 **Live Demo**: 
+🌐 **Live Demo**: [https://c4vqb6iq.pinit.eth.limo](https://c4vqb6iq.pinit.eth.limo)
 
 VeritasDAO is a **complete full-stack decentralized platform** for funding, publishing, and permanently archiving investigative journalism. Unlike frontend-only solutions, VeritasDAO implements a complete on-chain governance system with OpenZeppelin contracts, combined with a censorship-resistant frontend deployed via PinMe to IPFS and ENS.
 
@@ -73,15 +73,15 @@ VeritasDAO implements a complete on-chain governance system using OpenZeppelin c
 
 | Contract | Address | Description |
 |----------|---------|-------------|
-| **VeritasToken** | [`0xf37670d29689A64468c59016d381Cc94Cff7c5A5`](https://sepolia.etherscan.io/address/0xf37670d29689A64468c59016d381Cc94Cff7c5A5) | ERC20 governance token with voting power delegation |
-| **VeritasGovernor** | [`0x533C686792CeFB4119340b9cb4941bAE03Eb69F7`](https://sepolia.etherscan.io/address/0x533C686792CeFB4119340b9cb4941bAE03Eb69F7) | DAO governance contract for proposals and voting |
-| **Treasury** | [`0x24897c95A7ef3975709c7D7c0294226b0ec7377d`](https://sepolia.etherscan.io/address/0x24897c95A7ef3975709c7D7c0294226b0ec7377d) | Secure vault for DAO funds (Timelock-protected) |
-| **TimelockController** | [`0x5883640bbd3DfFEDA9aD68b240d3f93b2651046F`](https://sepolia.etherscan.io/address/0x5883640bbd3DfFEDA9aD68b240d3f93b2651046F) | Execution delay controller (1 hour delay) |
-| **DonationContract** | [`0xB2aF504561B9855B5688d508f193247053D0C28D`](https://sepolia.etherscan.io/address/0xB2aF504561B9855B5688d508f193247053D0C28D) | Donation & escrow system for proposals |
-| **ArticleRegistry** | [`0x9C2A8DB18ca3F29cE343658488BC733423cbdc69`](https://sepolia.etherscan.io/address/0x9C2A8DB18ca3F29cE343658488BC733423cbdc69) | On-chain registry for published articles |
-| **ReputationContract** | [`0x23a6AD0dA1A1eF2A6DC8eeE3AF461C1aA4268db5`](https://sepolia.etherscan.io/address/0x23a6AD0dA1A1eF2A6DC8eeE3AF461C1aA4268db5) | Reputation tracking for journalists |
-| **VeritasFaucet** | [`0x5DFcD5C0d798bED2FE41b1C7d0E00B2aF9e76706`](https://sepolia.etherscan.io/address/0x5DFcD5C0d798bED2FE41b1C7d0E00B2aF9e76706) | Test token faucet (1000 VERITAS per request) |
-| **JournalistRegistry** | [`0x67AfD69E6e00c8D87E494AD9051186629A7662EE`](https://sepolia.etherscan.io/address/0x67AfD69E6e00c8D87E494AD9051186629A7662EE) | On-chain journalist verification registry |
+| **VeritasToken** | [`0x44277D23d6058a4e8097a23D8226783E273Fb8Ce`](https://sepolia.etherscan.io/address/0x44277D23d6058a4e8097a23D8226783E273Fb8Ce) | ERC20 governance token with voting power delegation |
+| **VeritasGovernor** | [`0x4EC69FA138562377db9BfB5C001B68fe5d7dc405`](https://sepolia.etherscan.io/address/0x4EC69FA138562377db9BfB5C001B68fe5d7dc405) | DAO governance contract for proposals and voting |
+| **Treasury** | [`0xDF1D2d695f550c0479426C191517C5fA045c0621`](https://sepolia.etherscan.io/address/0xDF1D2d695f550c0479426C191517C5fA045c0621) | Secure vault for DAO funds (Timelock-protected) |
+| **TimelockController** | [`0xeDDC384f35b05cb11dDf00462885e77A0461b876`](https://sepolia.etherscan.io/address/0xeDDC384f35b05cb11dDf00462885e77A0461b876) | Execution delay controller (1 hour delay) |
+| **DonationContract** | [`0xBAC9f9dB0277F72C6EF95b11eD27804AA65761f1`](https://sepolia.etherscan.io/address/0xBAC9f9dB0277F72C6EF95b11eD27804AA65761f1) | Donation & escrow system for proposals |
+| **ArticleRegistry** | [`0x544643005A496e8E9612b4Db25b4Cc202C7379A3`](https://sepolia.etherscan.io/address/0x544643005A496e8E9612b4Db25b4Cc202C7379A3) | On-chain registry for published articles |
+| **ReputationContract** | [`0x7ac8DFcafa2695A17F7d437EBBE28A51A52b12a3`](https://sepolia.etherscan.io/address/0x7ac8DFcafa2695A17F7d437EBBE28A51A52b12a3) | Reputation tracking for journalists |
+| **VeritasFaucet** | [`0x4100d2Ca37216e6D1C414CC165f2F9E9E801E2b8`](https://sepolia.etherscan.io/address/0x4100d2Ca37216e6D1C414CC165f2F9E9E801E2b8) | Test token faucet (1000 VERITAS per request) |
+| **JournalistRegistry** | [`0x219B6f5f23705F103b676065eC6742F6f1cFfD16`](https://sepolia.etherscan.io/address/0x219B6f5f23705F103b676065eC6742F6f1cFfD16) | On-chain journalist verification registry |
 
 ### Key Features
 
